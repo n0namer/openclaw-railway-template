@@ -21,6 +21,11 @@
       authChoices: [],
       selectedAuth: '',
       authSecret: '',
+      customBaseUrl: '',
+      customModelId: '',
+      customCompatibility: 'openai',
+      cloudflareAccountId: '',
+      cloudflareGatewayId: '',
       telegramToken: '',
       discordToken: '',
       slackBotToken: '',
@@ -103,6 +108,11 @@
           authChoice: this.selectedAuth,
           authSecret: this.authSecret,
           model: this.model,
+          customBaseUrl: this.customBaseUrl,
+          customModelId: this.customModelId,
+          customCompatibility: this.customCompatibility,
+          cloudflareAccountId: this.cloudflareAccountId,
+          cloudflareGatewayId: this.cloudflareGatewayId,
           telegramToken: this.telegramToken,
           discordToken: this.discordToken,
           slackBotToken: this.slackBotToken,
@@ -520,6 +530,39 @@
             <label class="label">API Key / Token</label>
             <input x-model="authSecret" type="password" placeholder="Paste your API key or token" class="input" />
           </div>
+
+          <template x-if="selectedAuth === 'custom-api-key'">
+            <div>
+              <div class="form-group">
+                <label class="label">Base URL</label>
+                <input x-model="customBaseUrl" type="text" placeholder="e.g. https://api.example.com/v1" class="input" />
+              </div>
+              <div class="form-group">
+                <label class="label">Model ID</label>
+                <input x-model="customModelId" type="text" placeholder="e.g. my-model-id" class="input" />
+              </div>
+              <div class="form-group">
+                <label class="label">API Compatibility</label>
+                <select x-model="customCompatibility" class="select">
+                  <option value="openai">OpenAI-compatible</option>
+                  <option value="anthropic">Anthropic-compatible</option>
+                </select>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="selectedAuth === 'cloudflare-ai-gateway-api-key'">
+            <div>
+              <div class="form-group">
+                <label class="label">Account ID</label>
+                <input x-model="cloudflareAccountId" type="text" placeholder="Cloudflare Account ID" class="input" />
+              </div>
+              <div class="form-group">
+                <label class="label">Gateway ID</label>
+                <input x-model="cloudflareGatewayId" type="text" placeholder="Cloudflare AI Gateway ID" class="input" />
+              </div>
+            </div>
+          </template>
 
           <div class="form-group">
             <label class="label">Model</label>

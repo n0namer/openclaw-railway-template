@@ -420,14 +420,6 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
 
   const authGroups = [
     {
-      value: "openai",
-      label: "OpenAI",
-      hint: "API key",
-      options: [
-        { value: "openai-api-key", label: "OpenAI API key" },
-      ],
-    },
-    {
       value: "anthropic",
       label: "Anthropic",
       hint: "API key",
@@ -436,11 +428,29 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
     },
     {
+      value: "openai",
+      label: "OpenAI",
+      hint: "API key / Codex",
+      options: [
+        { value: "openai-api-key", label: "OpenAI API key" },
+        { value: "openai-codex", label: "OpenAI Codex (ChatGPT OAuth)" },
+      ],
+    },
+    {
       value: "google",
       label: "Google",
-      hint: "API key",
+      hint: "API key / CLI",
       options: [
         { value: "gemini-api-key", label: "Google Gemini API key" },
+        { value: "google-gemini-cli", label: "Google Gemini CLI (OAuth)" },
+      ],
+    },
+    {
+      value: "deepseek",
+      label: "DeepSeek",
+      hint: "API key",
+      options: [
+        { value: "deepseek-api-key", label: "DeepSeek API key" },
       ],
     },
     {
@@ -450,42 +460,28 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       options: [{ value: "openrouter-api-key", label: "OpenRouter API key" }],
     },
     {
-      value: "ai-gateway",
-      label: "Vercel AI Gateway",
+      value: "xai",
+      label: "xAI (Grok)",
       hint: "API key",
-      options: [
-        { value: "ai-gateway-api-key", label: "Vercel AI Gateway API key" },
-      ],
+      options: [{ value: "xai-api-key", label: "xAI API key" }],
     },
     {
-      value: "moonshot",
-      label: "Moonshot AI",
-      hint: "Kimi K2 + Kimi Code",
-      options: [
-        { value: "moonshot-api-key", label: "Moonshot AI API key" },
-        { value: "kimi-code-api-key", label: "Kimi Code API key" },
-      ],
-    },
-    {
-      value: "zai",
-      label: "Z.AI (GLM 4.7)",
+      value: "mistral",
+      label: "Mistral AI",
       hint: "API key",
-      options: [{ value: "zai-api-key", label: "Z.AI (GLM 4.7) API key" }],
+      options: [{ value: "mistral-api-key", label: "Mistral API key" }],
     },
     {
-      value: "minimax",
-      label: "MiniMax",
-      hint: "M2.1 (recommended)",
-      options: [
-        { value: "minimax-global-api", label: "MiniMax M2.1" },
-        { value: "minimax-global-api-lightning", label: "MiniMax M2.1 Lightning" },
-      ],
+      value: "together",
+      label: "Together AI",
+      hint: "API key",
+      options: [{ value: "together-api-key", label: "Together AI API key" }],
     },
     {
-      value: "qwen",
-      label: "Qwen",
-      hint: "OAuth",
-      options: [{ value: "qwen-portal", label: "Qwen OAuth" }],
+      value: "huggingface",
+      label: "Hugging Face",
+      hint: "API key",
+      options: [{ value: "huggingface-api-key", label: "Hugging Face API key" }],
     },
     {
       value: "copilot",
@@ -500,18 +496,152 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
     },
     {
+      value: "moonshot",
+      label: "Moonshot AI",
+      hint: "Kimi K2 + Kimi Code",
+      options: [
+        { value: "moonshot-api-key", label: "Moonshot AI API key" },
+        { value: "moonshot-api-key-cn", label: "Moonshot AI API key (CN)" },
+        { value: "kimi-code-api-key", label: "Kimi Code API key" },
+      ],
+    },
+    {
+      value: "minimax",
+      label: "MiniMax",
+      hint: "API key / OAuth",
+      options: [
+        { value: "minimax-global-api", label: "MiniMax API key (Global)" },
+        { value: "minimax-global-oauth", label: "MiniMax OAuth (Global)" },
+        { value: "minimax-cn-api", label: "MiniMax API key (CN)" },
+        { value: "minimax-cn-oauth", label: "MiniMax OAuth (CN)" },
+      ],
+    },
+    {
+      value: "zai",
+      label: "Z.AI (GLM 4.7)",
+      hint: "API key / OAuth",
+      options: [
+        { value: "zai-api-key", label: "Z.AI API key" },
+        { value: "zai-coding-global", label: "Z.AI Coding (Global)" },
+        { value: "zai-coding-cn", label: "Z.AI Coding (CN)" },
+        { value: "zai-global", label: "Z.AI (Global)" },
+        { value: "zai-cn", label: "Z.AI (CN)" },
+      ],
+    },
+    {
+      value: "qwen",
+      label: "Qwen",
+      hint: "OAuth",
+      options: [{ value: "qwen-portal", label: "Qwen OAuth" }],
+    },
+    {
+      value: "modelstudio",
+      label: "Alibaba Model Studio",
+      hint: "Qwen via Alibaba Cloud",
+      options: [
+        { value: "modelstudio-api-key", label: "Coding Plan (Global)" },
+        { value: "modelstudio-api-key-cn", label: "Coding Plan (CN)" },
+        { value: "modelstudio-standard-api-key", label: "Standard Plan (Global)" },
+        { value: "modelstudio-standard-api-key-cn", label: "Standard Plan (CN)" },
+      ],
+    },
+    {
+      value: "venice",
+      label: "Venice AI",
+      hint: "API key",
+      options: [{ value: "venice-api-key", label: "Venice AI API key" }],
+    },
+    {
+      value: "chutes",
+      label: "Chutes",
+      hint: "OAuth / API key",
+      options: [
+        { value: "chutes", label: "Chutes OAuth" },
+        { value: "chutes-api-key", label: "Chutes API key" },
+      ],
+    },
+    {
+      value: "kilocode",
+      label: "Kilocode",
+      hint: "API key",
+      options: [{ value: "kilocode-api-key", label: "Kilocode API key" }],
+    },
+    {
+      value: "xiaomi",
+      label: "Xiaomi",
+      hint: "API key",
+      options: [{ value: "xiaomi-api-key", label: "Xiaomi API key" }],
+    },
+    {
+      value: "volcengine",
+      label: "Volcano Engine (Doubao)",
+      hint: "API key",
+      options: [{ value: "volcengine-api-key", label: "Volcano Engine API key" }],
+    },
+    {
+      value: "byteplus",
+      label: "BytePlus",
+      hint: "API key",
+      options: [{ value: "byteplus-api-key", label: "BytePlus API key" }],
+    },
+    {
+      value: "qianfan",
+      label: "Qianfan (Baidu)",
+      hint: "API key",
+      options: [{ value: "qianfan-api-key", label: "Qianfan API key" }],
+    },
+    {
+      value: "ai-gateway",
+      label: "Vercel AI Gateway",
+      hint: "API key",
+      options: [
+        { value: "ai-gateway-api-key", label: "Vercel AI Gateway API key" },
+      ],
+    },
+    {
+      value: "cloudflare-ai-gateway",
+      label: "Cloudflare AI Gateway",
+      hint: "API key",
+      options: [
+        { value: "cloudflare-ai-gateway-api-key", label: "Cloudflare AI Gateway API key" },
+      ],
+    },
+    {
+      value: "litellm",
+      label: "LiteLLM",
+      hint: "Unified gateway",
+      options: [{ value: "litellm-api-key", label: "LiteLLM API key" }],
+    },
+    {
+      value: "opencode",
+      label: "OpenCode",
+      hint: "Zen / Go",
+      options: [
+        { value: "opencode-zen", label: "OpenCode Zen (multi-model proxy)" },
+        { value: "opencode-go", label: "OpenCode Go" },
+      ],
+    },
+    {
       value: "synthetic",
       label: "Synthetic",
       hint: "Anthropic-compatible (multi-model)",
       options: [{ value: "synthetic-api-key", label: "Synthetic API key" }],
     },
     {
-      value: "opencode-zen",
-      label: "OpenCode Zen",
-      hint: "API key",
+      value: "self-hosted",
+      label: "Self-hosted",
+      hint: "Ollama / vLLM / SGLang",
       options: [
-        { value: "opencode-zen", label: "OpenCode Zen (multi-model proxy)" },
+        { value: "ollama", label: "Ollama (local)" },
+        { value: "vllm", label: "vLLM" },
+        { value: "sglang", label: "SGLang" },
       ],
+    },
+    {
+      value: "custom",
+      label: "Custom endpoint",
+      hint: "OpenAI / Anthropic compatible",
+      options: [{ value: "custom-api-key", label: "Custom provider" }],
     },
   ];
 
@@ -552,22 +682,59 @@ function buildOnboardArgs(payload) {
 
     const secret = (payload.authSecret || "").trim();
     const map = {
-      "openai-api-key": "--openai-api-key",
       apiKey: "--anthropic-api-key",
-      "openrouter-api-key": "--openrouter-api-key",
-      "ai-gateway-api-key": "--ai-gateway-api-key",
-      "moonshot-api-key": "--moonshot-api-key",
-      "kimi-code-api-key": "--kimi-code-api-key",
+      "openai-api-key": "--openai-api-key",
       "gemini-api-key": "--gemini-api-key",
-      "zai-api-key": "--zai-api-key",
+      "deepseek-api-key": "--deepseek-api-key",
+      "openrouter-api-key": "--openrouter-api-key",
+      "xai-api-key": "--xai-api-key",
+      "mistral-api-key": "--mistral-api-key",
+      "together-api-key": "--together-api-key",
+      "huggingface-api-key": "--huggingface-api-key",
+      "moonshot-api-key": "--moonshot-api-key",
+      "moonshot-api-key-cn": "--moonshot-api-key",
+      "kimi-code-api-key": "--kimi-code-api-key",
       "minimax-global-api": "--minimax-api-key",
-      "minimax-global-api-lightning": "--minimax-api-key",
-      "synthetic-api-key": "--synthetic-api-key",
+      "minimax-cn-api": "--minimax-api-key",
+      "zai-api-key": "--zai-api-key",
+      "modelstudio-api-key": "--modelstudio-api-key",
+      "modelstudio-api-key-cn": "--modelstudio-api-key-cn",
+      "modelstudio-standard-api-key": "--modelstudio-standard-api-key",
+      "modelstudio-standard-api-key-cn": "--modelstudio-standard-api-key-cn",
+      "venice-api-key": "--venice-api-key",
+      "chutes-api-key": "--chutes-api-key",
+      "kilocode-api-key": "--kilocode-api-key",
+      "xiaomi-api-key": "--xiaomi-api-key",
+      "volcengine-api-key": "--volcengine-api-key",
+      "byteplus-api-key": "--byteplus-api-key",
+      "qianfan-api-key": "--qianfan-api-key",
+      "ai-gateway-api-key": "--ai-gateway-api-key",
+      "cloudflare-ai-gateway-api-key": "--cloudflare-ai-gateway-api-key",
+      "litellm-api-key": "--litellm-api-key",
       "opencode-zen": "--opencode-zen-api-key",
+      "opencode-go": "--opencode-go-api-key",
+      "synthetic-api-key": "--synthetic-api-key",
+      "custom-api-key": "--custom-api-key",
     };
     const flag = map[payload.authChoice];
     if (flag && secret) {
       args.push(flag, secret);
+    }
+
+    if (payload.authChoice === "custom-api-key") {
+      const baseUrl = (payload.customBaseUrl || "").trim();
+      const modelId = (payload.customModelId || "").trim();
+      const compat = (payload.customCompatibility || "").trim();
+      if (baseUrl) args.push("--custom-base-url", baseUrl);
+      if (modelId) args.push("--custom-model-id", modelId);
+      if (compat) args.push("--custom-compatibility", compat);
+    }
+
+    if (payload.authChoice === "cloudflare-ai-gateway-api-key") {
+      const accountId = (payload.cloudflareAccountId || "").trim();
+      const gatewayId = (payload.cloudflareGatewayId || "").trim();
+      if (accountId) args.push("--cloudflare-ai-gateway-account-id", accountId);
+      if (gatewayId) args.push("--cloudflare-ai-gateway-gateway-id", gatewayId);
     }
 
   }
@@ -600,21 +767,54 @@ function runCmd(cmd, args, opts = {}) {
 }
 
 const VALID_AUTH_CHOICES = [
-  "openai-api-key",
   "apiKey",
+  "openai-api-key",
+  "openai-codex",
   "gemini-api-key",
+  "google-gemini-cli",
+  "deepseek-api-key",
   "openrouter-api-key",
-  "ai-gateway-api-key",
-  "moonshot-api-key",
-  "kimi-code-api-key",
-  "zai-api-key",
-  "minimax-global-api",
-  "minimax-global-api-lightning",
-  "qwen-portal",
+  "xai-api-key",
+  "mistral-api-key",
+  "together-api-key",
+  "huggingface-api-key",
   "github-copilot",
   "copilot-proxy",
-  "synthetic-api-key",
+  "moonshot-api-key",
+  "moonshot-api-key-cn",
+  "kimi-code-api-key",
+  "minimax-global-api",
+  "minimax-global-oauth",
+  "minimax-cn-api",
+  "minimax-cn-oauth",
+  "zai-api-key",
+  "zai-coding-global",
+  "zai-coding-cn",
+  "zai-global",
+  "zai-cn",
+  "qwen-portal",
+  "modelstudio-api-key",
+  "modelstudio-api-key-cn",
+  "modelstudio-standard-api-key",
+  "modelstudio-standard-api-key-cn",
+  "venice-api-key",
+  "chutes",
+  "chutes-api-key",
+  "kilocode-api-key",
+  "xiaomi-api-key",
+  "volcengine-api-key",
+  "byteplus-api-key",
+  "qianfan-api-key",
+  "ai-gateway-api-key",
+  "cloudflare-ai-gateway-api-key",
+  "litellm-api-key",
   "opencode-zen",
+  "opencode-go",
+  "synthetic-api-key",
+  "ollama",
+  "vllm",
+  "sglang",
+  "custom-api-key",
 ];
 
 function validatePayload(payload) {
@@ -628,6 +828,11 @@ if (payload.authChoice && !VALID_AUTH_CHOICES.includes(payload.authChoice)) {
     "slackAppToken",
     "authSecret",
     "model",
+    "customBaseUrl",
+    "customModelId",
+    "customCompatibility",
+    "cloudflareAccountId",
+    "cloudflareGatewayId",
   ];
   for (const field of stringFields) {
     if (payload[field] !== undefined && typeof payload[field] !== "string") {
