@@ -91,12 +91,17 @@ ensure_deepseek_default_model() {
     return 0
   fi
 
-  if [ -z "${DEEPSEEK_API_KEY:-}" ]; then
-    warn "DEEPSEEK_API_KEY missing; DeepSeek provider not configured"
+  if [ -z "${OPENCLAW_LLM_KEY:-}" ] && [ -z "${DEEPSEEK_API_KEY:-}" ]; then
+    warn "OPENCLAW_LLM_KEY missing; DeepSeek provider not configured"
     return 0
   fi
 
+  export DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-$OPENCLAW_LLM_KEY}"
+  export OPENCLAW_LLM_KEY="${OPENCLAW_LLM_KEY:-$DEEPSEEK_API_KEY}"
+
   log "DeepSeek key present"
+  log "LLM model: $OPENCLAW_LLM_MODEL"
+  log "LLM base URL: $OPENCLAW_LLM_BASE_URL"
   cd "$OPENCLAW_WORKSPACE_DIR"
 
   if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
