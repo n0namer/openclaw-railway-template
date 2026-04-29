@@ -31,6 +31,31 @@
 
 Без volume deploy должен упасть. Это нормально: сборка специально защищается от запуска без persistent state.
 
+## Railway volume behavior
+
+ClawdBot requires a Railway Volume mounted at `/data`.
+
+There are two supported deploy modes:
+
+1. Deploy from fork:
+   - attach a Railway Volume manually;
+   - set mount path to `/data`;
+   - redeploy the service.
+
+2. Deploy from Railway Template:
+   - the template must include an attached volume on the ClawdBot service;
+   - mount path must be `/data`;
+   - the user should not create a second volume after deploy unless intentionally migrating data.
+
+Redeploy behavior:
+
+- redeploying the same Railway service reuses the existing attached volume;
+- it does not create a new volume;
+- do not add Dockerfile `VOLUME`;
+- do not use pre-deploy commands to read or write `/data`.
+
+The container checks `RAILWAY_VOLUME_MOUNT_PATH=/data` at runtime and exits early if the volume is missing or mounted at the wrong path.
+
 ### 3. Railway Variables
 
 Открыть Railway → Service → Variables → RAW Editor.
@@ -113,10 +138,10 @@ CLAWDBOT_SKILLS_UPDATE_ALL=false
 
 ## Plugins
 
-Плагины должны жить на volume:
+Плагины должны жить на volume внутри OpenClaw state:
 
 ```text
-/data/openclaw-plugins
+/data/.openclaw/extensions
 ```
 
 VK ставится только при:
