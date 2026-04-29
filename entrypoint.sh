@@ -32,9 +32,14 @@ export CLAWDBOT_SKILLS_ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWD
 export CLAWDBOT_VERIFY_RUNTIME="${CLAWDBOT_VERIFY_RUNTIME:-true}"
 export CLAWDBOT_RUN_DOCTOR="${CLAWDBOT_RUN_DOCTOR:-true}"
 export CLAWDBOT_SYNC_CONFIG_FROM_ENV="${CLAWDBOT_SYNC_CONFIG_FROM_ENV:-true}"
+export OPENCLAW_LLM_KEY="${OPENCLAW_LLM_KEY:-${DEEPSEEK_API_KEY:-}}"
+export DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-${OPENCLAW_LLM_KEY:-}}"
+export OPENCLAW_LLM_MODEL="${OPENCLAW_LLM_MODEL:-${CLAWDBOT_DEFAULT_MODEL:-deepseek/deepseek-chat}}"
+export OPENCLAW_LLM_BASE_URL="${OPENCLAW_LLM_BASE_URL:-https://api.deepseek.com}"
 export CLAWDBOT_DEFAULT_PROVIDER="${CLAWDBOT_DEFAULT_PROVIDER:-deepseek}"
-export CLAWDBOT_DEFAULT_MODEL="${CLAWDBOT_DEFAULT_MODEL:-deepseek/deepseek-chat}"
-export CLAWDBOT_VERIFY_LIVE_MODEL="${CLAWDBOT_VERIFY_LIVE_MODEL:-false}"
+export CLAWDBOT_DEFAULT_MODEL="$OPENCLAW_LLM_MODEL"
+export OPENCLAW_VERIFY_LIVE_MODEL="${OPENCLAW_VERIFY_LIVE_MODEL:-${CLAWDBOT_VERIFY_LIVE_MODEL:-false}}"
+export CLAWDBOT_VERIFY_LIVE_MODEL="$OPENCLAW_VERIFY_LIVE_MODEL"
 export CLAWDBOT_ENABLE_VK="${CLAWDBOT_ENABLE_VK:-false}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
 export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
@@ -138,7 +143,7 @@ render_config_if_missing() {
   fi
 
   has_model_secret=false
-  for var_name in OPENAI_API_KEY DEEPSEEK_API_KEY OPENROUTER_API_KEY LITELLM_API_KEY CUSTOM_API_KEY; do
+  for var_name in OPENCLAW_LLM_KEY DEEPSEEK_API_KEY; do
     if [ -n "${!var_name:-}" ]; then
       has_model_secret=true
     fi
@@ -153,7 +158,7 @@ render_config_if_missing() {
   esac
 
   if [ "$should_write_config" != "true" ]; then
-    log "skip auto config: no model key or CLAWDBOT_AUTO_CONFIG=$CLAWDBOT_AUTO_CONFIG"
+    log "skip auto config: no LLM key or CLAWDBOT_AUTO_CONFIG=$CLAWDBOT_AUTO_CONFIG"
     return 0
   fi
 
@@ -353,8 +358,8 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "verifyRuntime": "$CLAWDBOT_VERIFY_RUNTIME",
   "runDoctor": "$CLAWDBOT_RUN_DOCTOR",
   "syncConfigFromEnv": "$CLAWDBOT_SYNC_CONFIG_FROM_ENV",
-  "defaultProvider": "$CLAWDBOT_DEFAULT_PROVIDER",
-  "defaultModel": "$CLAWDBOT_DEFAULT_MODEL",
+  "llmModel": "$OPENCLAW_LLM_MODEL",
+  "llmBaseUrl": "$OPENCLAW_LLM_BASE_URL",
   "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
