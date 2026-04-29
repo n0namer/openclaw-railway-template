@@ -26,7 +26,7 @@ function replacementMap() {
   const vkEnabled = isTrue(process.env.CLAWDBOT_ENABLE_VK);
   const defaultModel = stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat');
   const openclawVersion = stringFromEnv('OPENCLAW_VERSION', '2026.4.23');
-  const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/openclaw-plugins');
+  const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/.openclaw/extensions');
   const gatewayToken = stringFromEnv('OPENCLAW_GATEWAY_TOKEN', stringFromEnv('CLAWDBOT_GATEWAY_TOKEN', ''));
   const gatewayBindRaw = stringFromEnv('INTERNAL_GATEWAY_BIND', 'lan');
   const gatewayBind = gatewayBindRaw === 'lan' ? 'loopback' : gatewayBindRaw;
@@ -75,7 +75,7 @@ function main() {
   parsed.plugins.enabled = true;
   parsed.plugins.load ??= {};
   parsed.plugins.load.paths ??= [];
-  const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/openclaw-plugins');
+  const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/.openclaw/extensions');
   if (!parsed.plugins.load.paths.includes(pluginsDir)) parsed.plugins.load.paths.push(pluginsDir);
   parsed.plugins.entries ??= {};
   parsed.plugins.entries.vk ??= {};
