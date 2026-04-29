@@ -40,67 +40,68 @@ RUN mkdir -p \
     /opt/clawdbot/seed/agents/support-agent \
     /opt/clawdbot/seed/agents/memory-agent \
     /opt/clawdbot/seed/agents/critic-agent \
-    /opt/clawdbot/seed/agents/golden-tester \
-  && cat > /opt/clawdbot/seed/skills/bmad/README.md <<'EOF'
-# BMAD Skill
+    /opt/clawdbot/seed/agents/golden-tester
 
-Use for structured product/engineering work: brief, architecture, decision log, backlog, acceptance criteria, and 48-72 hour execution plan.
-EOF
-  && cat > /opt/clawdbot/seed/skills/client-intake/README.md <<'EOF'
-# Client Intake Skill
-
-Use when a new business connects a channel. Collect business niche, offer, target audience, tone, forbidden topics, escalation rules, and success metric.
-EOF
-  && cat > /opt/clawdbot/seed/skills/sales-qualification/README.md <<'EOF'
-# Sales Qualification Skill
-
-Use when an incoming lead asks about price, terms, availability, service fit, consultation, booking, or purchase intent.
-EOF
-  && cat > /opt/clawdbot/seed/skills/objection-handling/README.md <<'EOF'
-# Objection Handling Skill
-
-Use when a lead resists price, timing, trust, relevance, quality, or asks for proof before taking the next step.
-EOF
-  && cat > /opt/clawdbot/seed/skills/lead-summary/README.md <<'EOF'
-# Lead Summary Skill
-
-Use after meaningful dialogue. Summarize need, budget, urgency, objections, promised follow-up, and next action.
-EOF
-  && cat > /opt/clawdbot/seed/skills/handoff-human/README.md <<'EOF'
-# Handoff Human Skill
-
-Use when confidence is low, payment/legal/medical risk appears, client asks for human, or conversation becomes angry.
-EOF
-  && cat > /opt/clawdbot/seed/agents/life-router/README.md <<'EOF'
-# life-router
-
-Default channel router. Decide whether the request is sales, support, memory, criticism/quality, or human handoff. Keep the answer short and action-oriented.
-EOF
-  && cat > /opt/clawdbot/seed/agents/sales-agent/README.md <<'EOF'
-# sales-agent
-
-Qualify leads, answer basic commercial questions, move to application/booking/payment, and summarize the lead.
-EOF
-  && cat > /opt/clawdbot/seed/agents/support-agent/README.md <<'EOF'
-# support-agent
-
-Handle FAQs, status questions, simple troubleshooting, and escalation to human when needed.
-EOF
-  && cat > /opt/clawdbot/seed/agents/memory-agent/README.md <<'EOF'
-# memory-agent
-
-Maintain client context, facts, preferences, and reusable summaries in the workspace.
-EOF
-  && cat > /opt/clawdbot/seed/agents/critic-agent/README.md <<'EOF'
-# critic-agent
-
-Check quality, safety, tone, missing next actions, and whether the answer moves the client forward.
-EOF
-  && cat > /opt/clawdbot/seed/agents/golden-tester/README.md <<'EOF'
-# golden-tester
-
-Run smoke checks for version, health, plugins, skills, routing, and redeploy persistence.
-EOF
+RUN printf '%s\n' \
+  '# BMAD Skill' \
+  '' \
+  'Use for structured product/engineering work: brief, architecture, decision log, backlog, acceptance criteria, and 48-72 hour execution plan.' \
+  > /opt/clawdbot/seed/skills/bmad/README.md
+RUN printf '%s\n' \
+  '# Client Intake Skill' \
+  '' \
+  'Use when a new business connects a channel. Collect business niche, offer, target audience, tone, forbidden topics, escalation rules, and success metric.' \
+  > /opt/clawdbot/seed/skills/client-intake/README.md
+RUN printf '%s\n' \
+  '# Sales Qualification Skill' \
+  '' \
+  'Use when an incoming lead asks about price, terms, availability, service fit, consultation, booking, or purchase intent.' \
+  > /opt/clawdbot/seed/skills/sales-qualification/README.md
+RUN printf '%s\n' \
+  '# Objection Handling Skill' \
+  '' \
+  'Use when a lead resists price, timing, trust, relevance, quality, or asks for proof before taking the next step.' \
+  > /opt/clawdbot/seed/skills/objection-handling/README.md
+RUN printf '%s\n' \
+  '# Lead Summary Skill' \
+  '' \
+  'Use after meaningful dialogue. Summarize need, budget, urgency, objections, promised follow-up, and next action.' \
+  > /opt/clawdbot/seed/skills/lead-summary/README.md
+RUN printf '%s\n' \
+  '# Handoff Human Skill' \
+  '' \
+  'Use when confidence is low, payment/legal/medical risk appears, client asks for human, or conversation becomes angry.' \
+  > /opt/clawdbot/seed/skills/handoff-human/README.md
+RUN printf '%s\n' \
+  '# life-router' \
+  '' \
+  'Default channel router. Decide whether the request is sales, support, memory, criticism/quality, or human handoff. Keep the answer short and action-oriented.' \
+  > /opt/clawdbot/seed/agents/life-router/README.md
+RUN printf '%s\n' \
+  '# sales-agent' \
+  '' \
+  'Qualify leads, answer basic commercial questions, move to application/booking/payment, and summarize the lead.' \
+  > /opt/clawdbot/seed/agents/sales-agent/README.md
+RUN printf '%s\n' \
+  '# support-agent' \
+  '' \
+  'Handle FAQs, status questions, simple troubleshooting, and escalation to human when needed.' \
+  > /opt/clawdbot/seed/agents/support-agent/README.md
+RUN printf '%s\n' \
+  '# memory-agent' \
+  '' \
+  'Maintain client context, facts, preferences, and reusable summaries in the workspace.' \
+  > /opt/clawdbot/seed/agents/memory-agent/README.md
+RUN printf '%s\n' \
+  '# critic-agent' \
+  '' \
+  'Check quality, safety, tone, missing next actions, and whether the answer moves the client forward.' \
+  > /opt/clawdbot/seed/agents/critic-agent/README.md
+RUN printf '%s\n' \
+  '# golden-tester' \
+  '' \
+  'Run smoke checks for version, health, plugins, skills, routing, and redeploy persistence.' \
+  > /opt/clawdbot/seed/agents/golden-tester/README.md
 
 RUN cat > /app/docker-entrypoint.sh <<'EOF'
 #!/usr/bin/env bash
@@ -125,6 +126,7 @@ export CLAWDBOT_VK_PLUGIN_REPO="${CLAWDBOT_VK_PLUGIN_REPO:-https://github.com/fi
 export CLAWDBOT_INSTALL_VK_PLUGIN="${CLAWDBOT_INSTALL_VK_PLUGIN:-true}"
 export CLAWDBOT_AUTO_CONFIG="${CLAWDBOT_AUTO_CONFIG:-auto}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
+export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
 export SELF_HEAL_MAX_ATTEMPTS="${SELF_HEAL_MAX_ATTEMPTS:-3}"
 
 mkdir -p \
@@ -195,17 +197,9 @@ esac
 
 if [ ! -f "$OPENCLAW_CONFIG_PATH" ] && [ "$should_write_config" = "true" ]; then
   log "create first-boot openclaw.json on volume"
-  node <<'NODE' > "$OPENCLAW_CONFIG_PATH"
+  node > "$OPENCLAW_CONFIG_PATH" <<'NODE'
 const env = process.env;
-const provider = env.DEEPSEEK_API_KEY
-  ? "deepseek"
-  : env.OPENROUTER_API_KEY
-    ? "openrouter"
-    : env.LITELLM_API_KEY
-      ? "litellm"
-      : env.CUSTOM_API_KEY
-        ? "custom"
-        : "openai";
+const provider = env.DEEPSEEK_API_KEY ? "deepseek" : env.OPENROUTER_API_KEY ? "openrouter" : env.LITELLM_API_KEY ? "litellm" : env.CUSTOM_API_KEY ? "custom" : "openai";
 const modelMap = {
   openai: env.OPENAI_MODEL || "openai/gpt-4.1-mini",
   deepseek: env.DEEPSEEK_MODEL || "deepseek/deepseek-chat",
@@ -215,11 +209,7 @@ const modelMap = {
 };
 const primary = modelMap[provider];
 const config = {
-  meta: {
-    template: "clawdbot-client-pack",
-    clientPackVersion: "0.1.0",
-    generatedAt: new Date().toISOString(),
-  },
+  meta: { template: "clawdbot-client-pack", clientPackVersion: "0.1.0", generatedAt: new Date().toISOString() },
   env: {
     OPENAI_API_KEY: env.OPENAI_API_KEY || undefined,
     OPENAI_BASE_URL: env.OPENAI_BASE_URL || "https://api.openai.com/v1",
@@ -234,16 +224,9 @@ const config = {
     BRAVE_SEARCH_API_KEY: env.BRAVE_SEARCH_API_KEY || undefined,
     SUPERMEMORY_API_KEY: env.SUPERMEMORY_API_KEY || undefined,
   },
-  diagnostics: {
-    otel: { enabled: env.OTEL_ENABLED !== "false" },
-    cacheTrace: { enabled: env.CACHE_TRACE_ENABLED === "true" },
-  },
+  diagnostics: { otel: { enabled: env.OTEL_ENABLED !== "false" }, cacheTrace: { enabled: env.CACHE_TRACE_ENABLED === "true" } },
   agents: {
-    defaults: {
-      model: { primary },
-      models: { [primary]: {} },
-      compaction: { mode: "safeguard" },
-    },
+    defaults: { model: { primary }, models: { [primary]: {} }, compaction: { mode: "safeguard" } },
     list: [
       { id: "main" },
       { id: "life-router", name: "life-router", workspace: `${env.OPENCLAW_WORKSPACE_DIR}/life-router`, agentDir: `${env.OPENCLAW_STATE_DIR}/agents/life-router/agent`, allowedTools: ["message", "read", "grep", "search_code", "exec"] },
@@ -254,28 +237,13 @@ const config = {
       { id: "golden-tester", name: "golden-tester", workspace: `${env.OPENCLAW_WORKSPACE_DIR}/golden-tester`, agentDir: `${env.OPENCLAW_STATE_DIR}/agents/golden-tester/agent` },
     ],
   },
-  tools: {
-    web: {
-      search: { enabled: Boolean(env.BRAVE_SEARCH_API_KEY), apiKey: env.BRAVE_SEARCH_API_KEY || undefined },
-      fetch: { enabled: true },
-    },
-  },
+  tools: { web: { search: { enabled: Boolean(env.BRAVE_SEARCH_API_KEY), apiKey: env.BRAVE_SEARCH_API_KEY || undefined }, fetch: { enabled: true } } },
   bindings: [
     { agentId: "life-router", match: { channel: "telegram" } },
     { agentId: "life-router", match: { channel: "vk" } },
   ],
   commands: { native: "auto", nativeSkills: "auto", restart: true },
-  hooks: {
-    internal: {
-      enabled: true,
-      entries: {
-        "session-memory": { enabled: true },
-        "command-logger": { enabled: true },
-        "golden-router": { enabled: true },
-        "fsm-runtime": { enabled: true },
-      },
-    },
-  },
+  hooks: { internal: { enabled: true, entries: { "session-memory": { enabled: true }, "command-logger": { enabled: true }, "golden-router": { enabled: true }, "fsm-runtime": { enabled: true } } } },
   channels: {
     telegram: {
       enabled: env.TELEGRAM_ENABLED === "true",
@@ -297,14 +265,7 @@ const config = {
     trustedProxies: ["100.64.0.0/10", "127.0.0.1"],
   },
   skills: {
-    load: {
-      extraDirs: [
-        env.OPENCLAW_SKILLS_DIR,
-        `${env.OPENCLAW_WORKSPACE_DIR}/skills`,
-        env.CLAWDBOT_SKILLS_DIR,
-      ].filter(Boolean),
-      watch: true,
-    },
+    load: { extraDirs: [env.OPENCLAW_SKILLS_DIR, `${env.OPENCLAW_WORKSPACE_DIR}/skills`, env.CLAWDBOT_SKILLS_DIR].filter(Boolean), watch: true },
     entries: {
       bmad: { enabled: true },
       "client-intake": { enabled: true },
@@ -318,11 +279,7 @@ const config = {
   plugins: {
     enabled: true,
     load: { paths: [env.OPENCLAW_VK_PLUGIN_DIR || `${env.OPENCLAW_PLUGINS_DIR}/openclaw-vk`] },
-    entries: {
-      telegram: { enabled: env.TELEGRAM_ENABLED === "true" },
-      fsm: { enabled: true },
-      "openclaw-channel-vk": { enabled: env.VK_ENABLED !== "false" },
-    },
+    entries: { telegram: { enabled: env.TELEGRAM_ENABLED === "true" }, fsm: { enabled: true }, "openclaw-channel-vk": { enabled: env.VK_ENABLED !== "false" } },
   },
 };
 function stripUndefined(value) {
@@ -358,7 +315,7 @@ chmod 700 /data
 log "OpenClaw version: $(node /usr/local/lib/node_modules/openclaw/dist/entry.js --version 2>/dev/null || true)"
 exec gosu openclaw node src/server.js
 EOF
-chmod +x /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 USER openclaw
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
