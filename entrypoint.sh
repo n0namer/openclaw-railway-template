@@ -42,11 +42,17 @@ export PATH="${NPM_CONFIG_PREFIX}/bin:${PNPM_HOME}:${PATH}"
 CLIENT_PACK_DIR="/app/client-pack/${CLAWDBOT_CLIENT_PACK}"
 OPENCLAW_BIN="node ${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}"
 
-if [ "${RAILWAY_VOLUME_MOUNT_PATH:-/data}" != "/data" ]; then
+if [ "${RAILWAY_VOLUME_MOUNT_PATH:-}" != "/data" ]; then
   log "ERROR: Railway volume must be mounted at /data"
   log "RAILWAY_VOLUME_MOUNT_PATH=${RAILWAY_VOLUME_MOUNT_PATH:-unset}"
   exit 1
 fi
+
+if ! mkdir -p /data/.clawdbot 2>/dev/null || ! touch /data/.clawdbot-write-test 2>/dev/null; then
+  log "ERROR: /data is not writable"
+  exit 1
+fi
+rm -f /data/.clawdbot-write-test
 
 mkdir -p \
   "$OPENCLAW_STATE_DIR" \
