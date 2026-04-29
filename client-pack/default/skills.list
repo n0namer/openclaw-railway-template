@@ -1,0 +1,33 @@
+# ClawdBot Client Pack v0.1
+# One skill spec per line. Installed by entrypoint via: openclaw skills install <spec>
+# Keep this list as an allowlist. Do not auto-install arbitrary ClawHub content.
+
+agent-creator-skill
+automation-workflows
+client-tracker
+cold-email-outreach
+content-marketing
+crm-in-a-box
+elite-longterm-memory
+email-composer
+email-daily-summary
+email-marketing-channels
+fluid-memory
+lead-generation
+linkedin-lead-generation
+marketing-analytics
+marketing-ideas
+marketing-strategy-pmm
+memory-tiering
+multi-agent-coordinator
+multi-agent-roles
+nano-pdf
+persona-sales-ops
+planning-with-files
+rag-search
+sales-funnel-design
+sales-mastery
+sales-pipeline-tracker
+sales-proposal-simulator
+seo-competitor-analysis
+twenty-crm
