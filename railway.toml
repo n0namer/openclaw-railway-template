@@ -9,21 +9,19 @@ requiredMountPath = "/data"
 
 [variables]
 OPENCLAW_VERSION = "2026.4.23"
+NODE_ENV = "production"
 
-OPENCLAW_API_KEY = "REPLACE_ME"
+OPENCLAW_LLM_KEY = "REPLACE_ME"
 OPENCLAW_LLM_MODEL = "deepseek/deepseek-chat"
 OPENCLAW_LLM_BASE_URL = "https://api.deepseek.com"
 
 OPENCLAW_GATEWAY_TOKEN = ""
 SETUP_PASSWORD = ""
 
-OPENCLAW_DEFAULT_PROVIDER = "deepseek"
-OPENCLAW_DEFAULT_MODEL = "deepseek/deepseek-chat"
-
-OPENCLAW_ENABLE_VK = "false"
+CLAWDBOT_ENABLE_VK = "true"
 VK_COMMUNITY_TOKEN = ""
 VK_GROUP_ID = ""
 
 OPENCLAW_VERIFY_LIVE_MODEL = "false"
-OPENCLAW_RUN_DOCTOR = "true"
-OPENCLAW_SYNC_CONFIG_FROM_ENV = "true"
+CLAWDBOT_RUN_DOCTOR = "true"
+CLAWDBOT_SYNC_CONFIG_FROM_ENV = "true"
