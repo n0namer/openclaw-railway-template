@@ -27,7 +27,7 @@ function replacementMap() {
   const defaultModel = stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat');
   const openclawVersion = stringFromEnv('OPENCLAW_VERSION', '2026.4.23');
   const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/.openclaw/extensions');
-  const gatewayToken = stringFromEnv('OPENCLAW_GATEWAY_TOKEN', stringFromEnv('CLAWDBOT_GATEWAY_TOKEN', ''));
+  const gatewayToken = stringFromEnv('OPENCLAW_GATEWAY_TOKEN', '');
   const gatewayBindRaw = stringFromEnv('INTERNAL_GATEWAY_BIND', 'lan');
   const gatewayBind = gatewayBindRaw === 'lan' ? 'loopback' : gatewayBindRaw;
 
