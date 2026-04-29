@@ -74,6 +74,7 @@ sync_body() {
     if "${OPENCLAW_BIN[@]}" skills install "$skill"; then
       write_marker "$marker" "$skill"
       log "installed: $skill"
+      log "warning: start a new OpenClaw session to ensure the skill is loaded: $skill"
     else
       rm -f "${marker}.tmp."* 2>/dev/null || true
       log "warning: install failed: $skill"
