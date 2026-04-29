@@ -6,7 +6,8 @@ import crypto from 'node:crypto';
 const configPath = process.env.OPENCLAW_CONFIG_PATH || '/data/.openclaw/openclaw.json';
 const syncEnabled = /^(true|1|yes|on)$/i.test(process.env.CLAWDBOT_SYNC_CONFIG_FROM_ENV || 'true');
 const pluginRoot = process.env.OPENCLAW_PLUGINS_DIR || '/data/.openclaw/extensions';
-const defaultModel = process.env.CLAWDBOT_DEFAULT_MODEL || 'deepseek/deepseek-chat';
+const defaultModel = process.env.OPENCLAW_LLM_MODEL || process.env.CLAWDBOT_DEFAULT_MODEL || 'deepseek/deepseek-chat';
+const llmBaseUrl = process.env.OPENCLAW_LLM_BASE_URL || 'https://api.deepseek.com';
 const vkEnabled = /^(true|1|yes|on)$/i.test(process.env.CLAWDBOT_ENABLE_VK || 'false');
 const gatewayToken = process.env.OPENCLAW_GATEWAY_TOKEN || '';
 
@@ -47,6 +48,38 @@ function writeJson(filePath, data) {
 function tokenFingerprint(value) {
   if (!value) return 'empty';
   return crypto.createHash('sha256').update(value).digest('hex').slice(0, 12);
+}
+
+function ensureDeepSeekModel(config, changes) {
+  const modelsRoot = ensureObject(config, 'models');
+  if (modelsRoot.mode !== 'merge') {
+    modelsRoot.mode = 'merge';
+    changes.push('models.mode=merge');
+  }
+  const providers = ensureObject(modelsRoot, 'providers');
+  const deepseek = ensureObject(providers, 'deepseek');
+  if (deepseek.baseUrl !== llmBaseUrl) {
+    deepseek.baseUrl = llmBaseUrl;
+    changes.push(`models.providers.deepseek.baseUrl=${llmBaseUrl}`);
+  }
+  if (deepseek.api !== 'openai-completions') {
+    deepseek.api = 'openai-completions';
+    changes.push('models.providers.deepseek.api=openai-completions');
+  }
+  if (!Array.isArray(deepseek.models)) deepseek.models = [];
+  const [, modelId = defaultModel] = defaultModel.split('/', 2);
+  if (!deepseek.models.some((item) => item && item.id === modelId)) {
+    deepseek.models.push({
+      id: modelId,
+      name: modelId,
+      reasoning: false,
+      input: ['text'],
+      contextWindow: 128000,
+      contextTokens: 96000,
+      maxTokens: 8192,
+    });
+    changes.push(`models.providers.deepseek.models.${modelId}=present`);
+  }
 }
 
 function main() {
@@ -91,6 +124,8 @@ function main() {
     models[defaultModel] = {};
     changes.push(`agents.defaults.models.${defaultModel}=present`);
   }
+
+  ensureDeepSeekModel(config, changes);
 
   const plugins = ensureObject(config, 'plugins');
   plugins.enabled = true;
