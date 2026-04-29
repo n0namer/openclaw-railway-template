@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import path from 'node:path';
 
 const configPath = process.env.OPENCLAW_CONFIG_PATH || '/data/.openclaw/openclaw.json';
 const defaultModel = process.env.CLAWDBOT_DEFAULT_MODEL || 'deepseek/deepseek-chat';
@@ -16,12 +15,54 @@ function fail(message) {
   process.exitCode = 1;
 }
 
+function stripTrailingCommas(raw) {
+  let out = '';
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < raw.length; i += 1) {
+    const char = raw[i];
+
+    if (inString) {
+      out += char;
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      out += char;
+      continue;
+    }
+
+    if (char === ',') {
+      let j = i + 1;
+      while (j < raw.length && /\s/.test(raw[j])) j += 1;
+      if (raw[j] === '}' || raw[j] === ']') continue;
+    }
+
+    out += char;
+  }
+
+  return out;
+}
+
 function readJsonLike(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   try {
     return JSON.parse(raw);
-  } catch (error) {
-    throw new Error(`cannot parse ${filePath} as JSON after OpenClaw validation: ${error.message}`);
+  } catch (firstError) {
+    try {
+      return JSON.parse(stripTrailingCommas(raw));
+    } catch (secondError) {
+      throw new Error(`cannot parse ${filePath} as JSON/JSON5-like config after OpenClaw validation: ${secondError.message}; first parse error: ${firstError.message}`);
+    }
   }
 }
 
@@ -146,7 +187,14 @@ function main() {
     process.exit();
   }
 
-  const config = readJsonLike(configPath);
+  let config;
+  try {
+    config = readJsonLike(configPath);
+  } catch (error) {
+    fail(error.message);
+    process.exit();
+  }
+
   checkDefaultModel(config);
   checkPlugins(config);
   checkChannels(config);
