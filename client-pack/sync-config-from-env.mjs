@@ -4,11 +4,11 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const configPath = process.env.OPENCLAW_CONFIG_PATH || '/data/.openclaw/openclaw.json';
-const syncEnabled = /^(true|1|yes|on)$/i.test(process.env.CLAWDBOT_SYNC_CONFIG_FROM_ENV || 'true');
+const syncEnabled = /^(true|1|yes|on)$/i.test(process.env.OPENCLAW_SYNC_CONFIG_FROM_ENV || 'true');
 const pluginRoot = process.env.OPENCLAW_PLUGINS_DIR || '/data/.openclaw/extensions';
-const defaultModel = process.env.OPENCLAW_LLM_MODEL || process.env.CLAWDBOT_DEFAULT_MODEL || 'deepseek/deepseek-chat';
+const defaultModel = process.env.OPENCLAW_LLM_MODEL || process.env.OPENCLAW_DEFAULT_MODEL || 'deepseek/deepseek-chat';
 const llmBaseUrl = process.env.OPENCLAW_LLM_BASE_URL || 'https://api.deepseek.com';
-const vkEnabled = /^(true|1|yes|on)$/i.test(process.env.CLAWDBOT_ENABLE_VK || 'false');
+const vkEnabled = /^(true|1|yes|on)$/i.test(process.env.OPENCLAW_ENABLE_VK || 'false');
 const gatewayToken = process.env.OPENCLAW_GATEWAY_TOKEN || '';
 
 function log(message) {
@@ -84,7 +84,7 @@ function ensureDeepSeekModel(config, changes) {
 
 function main() {
   if (!syncEnabled) {
-    log('skip: CLAWDBOT_SYNC_CONFIG_FROM_ENV=false');
+    log('skip: OPENCLAW_SYNC_CONFIG_FROM_ENV=false');
     return;
   }
 

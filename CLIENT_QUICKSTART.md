@@ -11,7 +11,7 @@
 3. создаёт `/data/.openclaw/openclaw.json`, если его ещё нет;
 4. настраивает модель по умолчанию для всех агентов;
 5. ставит skills из `/data/.clawdbot/skills.allowlist`;
-6. ставит VK plugin только если `CLAWDBOT_ENABLE_VK=true`;
+6. ставит VK plugin только если `OPENCLAW_ENABLE_VK=true`;
 7. проверяет итоговый runtime и config;
 8. пишет понятные логи `[clawdbot-entrypoint]`, `[skills-sync]`, `[verify-runtime]`, `[verify-config]`.
 
@@ -70,14 +70,14 @@ The container checks `RAILWAY_VOLUME_MOUNT_PATH=/data` at runtime and exits earl
 SETUP_PASSWORD=
 DEEPSEEK_API_KEY=
 OPENCLAW_GATEWAY_TOKEN=
-CLAWDBOT_GATEWAY_TOKEN=
-CLAWDBOT_ENABLE_VK=false
+OPENCLAW_GATEWAY_TOKEN=
+OPENCLAW_ENABLE_VK=false
 ```
 
 Если VK нужен сразу:
 
 ```env
-CLAWDBOT_ENABLE_VK=true
+OPENCLAW_ENABLE_VK=true
 VK_COMMUNITY_TOKEN=
 VK_GROUP_ID=
 ```
@@ -87,8 +87,8 @@ VK_GROUP_ID=
 По умолчанию все агенты должны наследовать одну модель:
 
 ```env
-CLAWDBOT_DEFAULT_PROVIDER=deepseek
-CLAWDBOT_DEFAULT_MODEL=deepseek/deepseek-chat
+OPENCLAW_DEFAULT_PROVIDER=deepseek
+OPENCLAW_DEFAULT_MODEL=deepseek/deepseek-chat
 ```
 
 Итоговый config должен содержать:
@@ -133,7 +133,7 @@ client-pack/default/skills.list
 Фоновый helper доставит недостающий skill. Уже установленные skills не обновляются автоматически, потому что `update --all` может поменять поведение клиента.
 
 ```env
-CLAWDBOT_SKILLS_UPDATE_ALL=false
+OPENCLAW_SKILLS_UPDATE_ALL=false
 ```
 
 ## Plugins
@@ -147,10 +147,10 @@ CLAWDBOT_SKILLS_UPDATE_ALL=false
 VK ставится только при:
 
 ```env
-CLAWDBOT_ENABLE_VK=true
+OPENCLAW_ENABLE_VK=true
 ```
 
-Если `CLAWDBOT_ENABLE_VK=false`, VK channel/plugin должен быть выключен в итоговом config.
+Если `OPENCLAW_ENABLE_VK=false`, VK channel/plugin должен быть выключен в итоговом config.
 
 ## Зелёные логи после deploy
 
@@ -242,8 +242,8 @@ src/*
 Не включать по умолчанию:
 
 ```env
-CLAWDBOT_SKILLS_UPDATE_ALL=true
-CLAWDBOT_VERIFY_LIVE_MODEL=true
+OPENCLAW_SKILLS_UPDATE_ALL=true
+OPENCLAW_VERIFY_LIVE_MODEL=true
 ```
 
 Не хранить в Git реальные значения:

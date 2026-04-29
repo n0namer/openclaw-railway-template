@@ -18,17 +18,17 @@ safe_marker_name() {
 
 OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-/data/.openclaw}"
 OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-/data/workspace}"
-CLAWDBOT_STATE_DIR="${CLAWDBOT_STATE_DIR:-/data/.clawdbot}"
+OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-/data/.clawdbot}"
 OPENCLAW_ENTRY="${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}"
-ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWDBOT_STATE_DIR}/skills.allowlist}"
-MARKER_DIR="${CLAWDBOT_STATE_DIR}/installed-skills"
-LOG_DIR="${CLAWDBOT_STATE_DIR}/logs"
-LOCK_DIR="${CLAWDBOT_STATE_DIR}/locks"
-SYNC_INTERVAL_SECONDS="${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
+ALLOWLIST_PATH="${OPENCLAW_SKILLS_ALLOWLIST_PATH:-${OPENCLAW_STATE_DIR}/skills.allowlist}"
+MARKER_DIR="${OPENCLAW_STATE_DIR}/installed-skills"
+LOG_DIR="${OPENCLAW_STATE_DIR}/logs"
+LOCK_DIR="${OPENCLAW_STATE_DIR}/locks"
+SYNC_INTERVAL_SECONDS="${OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
 OPENCLAW_BIN=(node "$OPENCLAW_ENTRY")
 
 mkdir -p \
-  "$CLAWDBOT_STATE_DIR" \
+  "$OPENCLAW_STATE_DIR" \
   "$MARKER_DIR" \
   "$LOG_DIR" \
   "$LOCK_DIR" \
@@ -52,7 +52,7 @@ sync_body() {
   log "sync start: $ALLOWLIST_PATH"
   cd "$OPENCLAW_WORKSPACE_DIR"
 
-  if is_true "${CLAWDBOT_SKILLS_UPDATE_ALL:-false}"; then
+  if is_true "${OPENCLAW_SKILLS_UPDATE_ALL:-false}"; then
     log 'update tracked ClawHub skills: openclaw skills update --all'
     "${OPENCLAW_BIN[@]}" skills update --all || log 'warning: skills update --all failed'
   fi

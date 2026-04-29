@@ -17,30 +17,30 @@ export OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-/data/workspace}"
 export OPENCLAW_CONFIG_PATH="${OPENCLAW_CONFIG_PATH:-${OPENCLAW_STATE_DIR}/openclaw.json}"
 export OPENCLAW_SKILLS_DIR="${OPENCLAW_SKILLS_DIR:-${OPENCLAW_STATE_DIR}/skills}"
 export OPENCLAW_PLUGINS_DIR="${OPENCLAW_PLUGINS_DIR:-/data/.openclaw/extensions}"
-export CLAWDBOT_STATE_DIR="${CLAWDBOT_STATE_DIR:-/data/.clawdbot}"
-export CLAWDBOT_WORKSPACE_DIR="${CLAWDBOT_WORKSPACE_DIR:-${OPENCLAW_WORKSPACE_DIR}}"
-export CLAWDBOT_SKILLS_DIR="${CLAWDBOT_SKILLS_DIR:-${CLAWDBOT_STATE_DIR}/skills}"
-export CLAWDBOT_PLUGINS_DIR="${CLAWDBOT_PLUGINS_DIR:-/data/.openclaw/extensions}"
-export CLAWDBOT_CLIENT_PACK="${CLAWDBOT_CLIENT_PACK:-default}"
-export CLAWDBOT_AUTO_CONFIG="${CLAWDBOT_AUTO_CONFIG:-auto}"
-export CLAWDBOT_BOOTSTRAP_SKILLS="${CLAWDBOT_BOOTSTRAP_SKILLS:-true}"
-export CLAWDBOT_BOOTSTRAP_PLUGINS="${CLAWDBOT_BOOTSTRAP_PLUGINS:-true}"
-export CLAWDBOT_SKILLS_SYNC_ENABLED="${CLAWDBOT_SKILLS_SYNC_ENABLED:-true}"
-export CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS="${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
-export CLAWDBOT_SKILLS_UPDATE_ALL="${CLAWDBOT_SKILLS_UPDATE_ALL:-false}"
-export CLAWDBOT_SKILLS_ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWDBOT_STATE_DIR}/skills.allowlist}"
-export CLAWDBOT_VERIFY_RUNTIME="${CLAWDBOT_VERIFY_RUNTIME:-true}"
-export CLAWDBOT_RUN_DOCTOR="${CLAWDBOT_RUN_DOCTOR:-true}"
-export CLAWDBOT_SYNC_CONFIG_FROM_ENV="${CLAWDBOT_SYNC_CONFIG_FROM_ENV:-true}"
+export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-/data/.clawdbot}"
+export OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-${OPENCLAW_WORKSPACE_DIR}}"
+export OPENCLAW_SKILLS_DIR="${OPENCLAW_SKILLS_DIR:-${OPENCLAW_STATE_DIR}/skills}"
+export OPENCLAW_PLUGINS_DIR="${OPENCLAW_PLUGINS_DIR:-/data/.openclaw/extensions}"
+export OPENCLAW_CLIENT_PACK="${OPENCLAW_CLIENT_PACK:-default}"
+export OPENCLAW_AUTO_CONFIG="${OPENCLAW_AUTO_CONFIG:-auto}"
+export OPENCLAW_BOOTSTRAP_SKILLS="${OPENCLAW_BOOTSTRAP_SKILLS:-true}"
+export OPENCLAW_BOOTSTRAP_PLUGINS="${OPENCLAW_BOOTSTRAP_PLUGINS:-true}"
+export OPENCLAW_SKILLS_SYNC_ENABLED="${OPENCLAW_SKILLS_SYNC_ENABLED:-true}"
+export OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS="${OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
+export OPENCLAW_SKILLS_UPDATE_ALL="${OPENCLAW_SKILLS_UPDATE_ALL:-false}"
+export OPENCLAW_SKILLS_ALLOWLIST_PATH="${OPENCLAW_SKILLS_ALLOWLIST_PATH:-${OPENCLAW_STATE_DIR}/skills.allowlist}"
+export OPENCLAW_VERIFY_RUNTIME="${OPENCLAW_VERIFY_RUNTIME:-true}"
+export OPENCLAW_RUN_DOCTOR="${OPENCLAW_RUN_DOCTOR:-true}"
+export OPENCLAW_SYNC_CONFIG_FROM_ENV="${OPENCLAW_SYNC_CONFIG_FROM_ENV:-true}"
 export OPENCLAW_LLM_KEY="${OPENCLAW_LLM_KEY:-${DEEPSEEK_API_KEY:-}}"
 export DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-${OPENCLAW_LLM_KEY:-}}"
-export OPENCLAW_LLM_MODEL="${OPENCLAW_LLM_MODEL:-${CLAWDBOT_DEFAULT_MODEL:-deepseek/deepseek-chat}}"
+export OPENCLAW_LLM_MODEL="${OPENCLAW_LLM_MODEL:-${OPENCLAW_DEFAULT_MODEL:-deepseek/deepseek-chat}}"
 export OPENCLAW_LLM_BASE_URL="${OPENCLAW_LLM_BASE_URL:-https://api.deepseek.com}"
-export CLAWDBOT_DEFAULT_PROVIDER="${CLAWDBOT_DEFAULT_PROVIDER:-deepseek}"
-export CLAWDBOT_DEFAULT_MODEL="$OPENCLAW_LLM_MODEL"
-export OPENCLAW_VERIFY_LIVE_MODEL="${OPENCLAW_VERIFY_LIVE_MODEL:-${CLAWDBOT_VERIFY_LIVE_MODEL:-false}}"
-export CLAWDBOT_VERIFY_LIVE_MODEL="$OPENCLAW_VERIFY_LIVE_MODEL"
-export CLAWDBOT_ENABLE_VK="${CLAWDBOT_ENABLE_VK:-false}"
+export OPENCLAW_DEFAULT_PROVIDER="${OPENCLAW_DEFAULT_PROVIDER:-deepseek}"
+export OPENCLAW_DEFAULT_MODEL="$OPENCLAW_LLM_MODEL"
+export OPENCLAW_VERIFY_LIVE_MODEL="${OPENCLAW_VERIFY_LIVE_MODEL:-${OPENCLAW_VERIFY_LIVE_MODEL:-false}}"
+export OPENCLAW_VERIFY_LIVE_MODEL="$OPENCLAW_VERIFY_LIVE_MODEL"
+export OPENCLAW_ENABLE_VK="${OPENCLAW_ENABLE_VK:-false}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
 export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
 export SELF_HEAL_MAX_ATTEMPTS="${SELF_HEAL_MAX_ATTEMPTS:-3}"
@@ -50,7 +50,7 @@ export PNPM_HOME="${PNPM_HOME:-/data/pnpm}"
 export PNPM_STORE_DIR="${PNPM_STORE_DIR:-/data/pnpm-store}"
 export PATH="${NPM_CONFIG_PREFIX}/bin:${PNPM_HOME}:${PATH}"
 
-CLIENT_PACK_DIR="/app/client-pack/${CLAWDBOT_CLIENT_PACK}"
+CLIENT_PACK_DIR="/app/client-pack/${OPENCLAW_CLIENT_PACK}"
 OPENCLAW_BIN="node ${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}"
 
 if [ "${RAILWAY_VOLUME_MOUNT_PATH:-}" != "/data" ]; then
@@ -70,14 +70,14 @@ mkdir -p \
   "$OPENCLAW_WORKSPACE_DIR" \
   "$OPENCLAW_SKILLS_DIR" \
   "$OPENCLAW_PLUGINS_DIR" \
-  "$CLAWDBOT_STATE_DIR" \
-  "$CLAWDBOT_SKILLS_DIR" \
-  "$CLAWDBOT_PLUGINS_DIR" \
-  "$CLAWDBOT_STATE_DIR/installed-skills" \
-  "$CLAWDBOT_STATE_DIR/installed-plugins" \
-  "$CLAWDBOT_STATE_DIR/templates" \
-  "$CLAWDBOT_STATE_DIR/logs" \
-  "$CLAWDBOT_STATE_DIR/locks" \
+  "$OPENCLAW_STATE_DIR" \
+  "$OPENCLAW_SKILLS_DIR" \
+  "$OPENCLAW_PLUGINS_DIR" \
+  "$OPENCLAW_STATE_DIR/installed-skills" \
+  "$OPENCLAW_STATE_DIR/installed-plugins" \
+  "$OPENCLAW_STATE_DIR/templates" \
+  "$OPENCLAW_STATE_DIR/logs" \
+  "$OPENCLAW_STATE_DIR/locks" \
   "$OPENCLAW_WORKSPACE_DIR/skills" \
   "$OPENCLAW_WORKSPACE_DIR/plugins" \
   "$OPENCLAW_WORKSPACE_DIR/agents" \
@@ -90,11 +90,11 @@ mkdir -p \
   /data/backups
 
 ensure_gateway_token() {
-  local token_file="$CLAWDBOT_STATE_DIR/openclaw_gateway_token"
+  local token_file="$OPENCLAW_STATE_DIR/openclaw_gateway_token"
 
-  if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ] && [ -n "${CLAWDBOT_GATEWAY_TOKEN:-}" ]; then
-    log 'warning: CLAWDBOT_GATEWAY_TOKEN is deprecated; use OPENCLAW_GATEWAY_TOKEN'
-    export OPENCLAW_GATEWAY_TOKEN="$CLAWDBOT_GATEWAY_TOKEN"
+  if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ] && [ -n "${OPENCLAW_GATEWAY_TOKEN:-}" ]; then
+    log 'warning: OPENCLAW_GATEWAY_TOKEN is deprecated; use OPENCLAW_GATEWAY_TOKEN'
+    export OPENCLAW_GATEWAY_TOKEN="$OPENCLAW_GATEWAY_TOKEN"
   fi
 
   if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]; then
@@ -114,7 +114,7 @@ ensure_gateway_token() {
 }
 
 ensure_setup_password() {
-  local password_file="$CLAWDBOT_STATE_DIR/setup_password"
+  local password_file="$OPENCLAW_STATE_DIR/setup_password"
 
   if [ -z "${SETUP_PASSWORD:-}" ]; then
     if [ -f "$password_file" ]; then
@@ -141,17 +141,17 @@ ln -sfn /data/.linuxbrew /home/linuxbrew/.linuxbrew
 
 seed_skills_allowlist_if_missing() {
   local source_list="$CLIENT_PACK_DIR/skills.list"
-  if [ -f "$CLAWDBOT_SKILLS_ALLOWLIST_PATH" ]; then
-    log "preserve existing skills allowlist: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+  if [ -f "$OPENCLAW_SKILLS_ALLOWLIST_PATH" ]; then
+    log "preserve existing skills allowlist: $OPENCLAW_SKILLS_ALLOWLIST_PATH"
     return 0
   fi
-  mkdir -p "$(dirname "$CLAWDBOT_SKILLS_ALLOWLIST_PATH")"
+  mkdir -p "$(dirname "$OPENCLAW_SKILLS_ALLOWLIST_PATH")"
   if [ -f "$source_list" ]; then
-    log "seed skills allowlist from client pack: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
-    cp -a "$source_list" "$CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+    log "seed skills allowlist from client pack: $OPENCLAW_SKILLS_ALLOWLIST_PATH"
+    cp -a "$source_list" "$OPENCLAW_SKILLS_ALLOWLIST_PATH"
   else
-    log "create empty skills allowlist: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
-    touch "$CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+    log "create empty skills allowlist: $OPENCLAW_SKILLS_ALLOWLIST_PATH"
+    touch "$OPENCLAW_SKILLS_ALLOWLIST_PATH"
   fi
 }
 
@@ -169,7 +169,7 @@ render_config_if_missing() {
   done
 
   should_write_config=false
-  case "$CLAWDBOT_AUTO_CONFIG" in
+  case "$OPENCLAW_AUTO_CONFIG" in
     true|1|yes) should_write_config=true ;;
     false|0|no) should_write_config=false ;;
     auto) if [ "$has_model_secret" = "true" ]; then should_write_config=true; fi ;;
@@ -177,7 +177,7 @@ render_config_if_missing() {
   esac
 
   if [ "$should_write_config" != "true" ]; then
-    log "skip auto config: no LLM key or CLAWDBOT_AUTO_CONFIG=$CLAWDBOT_AUTO_CONFIG"
+    log "skip auto config: no LLM key or OPENCLAW_AUTO_CONFIG=$OPENCLAW_AUTO_CONFIG"
     return 0
   fi
 
@@ -197,7 +197,7 @@ render_config_if_missing() {
 }
 
 sync_config_from_env() {
-  if ! is_true "$CLAWDBOT_SYNC_CONFIG_FROM_ENV"; then
+  if ! is_true "$OPENCLAW_SYNC_CONFIG_FROM_ENV"; then
     log 'skip config env sync'
     return 0
   fi
@@ -213,7 +213,7 @@ sync_config_from_env() {
 }
 
 run_doctor() {
-  if ! is_true "$CLAWDBOT_RUN_DOCTOR"; then
+  if ! is_true "$OPENCLAW_RUN_DOCTOR"; then
     log 'skip OpenClaw doctor'
     return 0
   fi
@@ -254,7 +254,7 @@ install_plugin_once() {
   fi
 
   marker_name="$(safe_marker_name "$spec")"
-  marker="$CLAWDBOT_STATE_DIR/installed-plugins/${marker_name}.done"
+  marker="$OPENCLAW_STATE_DIR/installed-plugins/${marker_name}.done"
 
   cd "$OPENCLAW_WORKSPACE_DIR"
   if [ ! -f "$marker" ]; then
@@ -278,7 +278,7 @@ install_plugin_once() {
 }
 
 sync_skills_once() {
-  if ! is_true "$CLAWDBOT_BOOTSTRAP_SKILLS"; then
+  if ! is_true "$OPENCLAW_BOOTSTRAP_SKILLS"; then
     log 'skip skills bootstrap'
     return 0
   fi
@@ -290,7 +290,7 @@ sync_skills_once() {
 }
 
 verify_runtime() {
-  if ! is_true "$CLAWDBOT_VERIFY_RUNTIME"; then
+  if ! is_true "$OPENCLAW_VERIFY_RUNTIME"; then
     log 'skip runtime verifier'
     return 0
   fi
@@ -306,7 +306,7 @@ verify_runtime() {
 }
 
 start_skills_sync_daemon() {
-  if ! is_true "$CLAWDBOT_SKILLS_SYNC_ENABLED"; then
+  if ! is_true "$OPENCLAW_SKILLS_SYNC_ENABLED"; then
     log 'skip skills hot-sync daemon'
     return 0
   fi
@@ -314,24 +314,24 @@ start_skills_sync_daemon() {
     log 'warning: skills sync script missing'
     return 0
   fi
-  log "start skills hot-sync daemon, interval=${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS}s"
-  gosu openclaw bash /app/client-pack/sync-skills.sh daemon >> "$CLAWDBOT_STATE_DIR/logs/skills-sync-daemon.log" 2>&1 &
+  log "start skills hot-sync daemon, interval=${OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS}s"
+  gosu openclaw bash /app/client-pack/sync-skills.sh daemon >> "$OPENCLAW_STATE_DIR/logs/skills-sync-daemon.log" 2>&1 &
 }
 
 bootstrap_plugins() {
-  if ! is_true "$CLAWDBOT_BOOTSTRAP_PLUGINS"; then
+  if ! is_true "$OPENCLAW_BOOTSTRAP_PLUGINS"; then
     log 'skip plugins bootstrap'
     return 0
   fi
 
-  if is_true "$CLAWDBOT_ENABLE_VK"; then
+  if is_true "$OPENCLAW_ENABLE_VK"; then
     export VK_GROUP_TOKEN="${VK_GROUP_TOKEN:-${VK_COMMUNITY_TOKEN:-}}"
     if [ -z "${VK_GROUP_TOKEN:-}" ] || [ -z "${VK_GROUP_ID:-}" ]; then
-      log 'warning: CLAWDBOT_ENABLE_VK=true, but VK_COMMUNITY_TOKEN/VK_GROUP_ID is missing'
+      log 'warning: OPENCLAW_ENABLE_VK=true, but VK_COMMUNITY_TOKEN/VK_GROUP_ID is missing'
     fi
     install_plugin_once 'clawhub:vk-plugin|vk' || true
   else
-    log 'skip VK plugin: CLAWDBOT_ENABLE_VK=false'
+    log 'skip VK plugin: OPENCLAW_ENABLE_VK=false'
   fi
 
   local list_file="$CLIENT_PACK_DIR/plugins.list"
@@ -348,7 +348,7 @@ bootstrap_plugins() {
 if [ ! -d "$CLIENT_PACK_DIR" ]; then
   log "client pack not found: $CLIENT_PACK_DIR"
 else
-  cp -a "$CLIENT_PACK_DIR" "$CLAWDBOT_STATE_DIR/templates/${CLAWDBOT_CLIENT_PACK}" 2>/dev/null || true
+  cp -a "$CLIENT_PACK_DIR" "$OPENCLAW_STATE_DIR/templates/${OPENCLAW_CLIENT_PACK}" 2>/dev/null || true
 fi
 
 ensure_gateway_token
@@ -366,26 +366,26 @@ run_doctor
 verify_runtime
 start_skills_sync_daemon
 
-cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
+cat > "$OPENCLAW_STATE_DIR/client-pack.manifest.json" <<JSON
 {
-  "clientPack": "$CLAWDBOT_CLIENT_PACK",
+  "clientPack": "$OPENCLAW_CLIENT_PACK",
   "stateDir": "$OPENCLAW_STATE_DIR",
   "workspaceDir": "$OPENCLAW_WORKSPACE_DIR",
   "configPath": "$OPENCLAW_CONFIG_PATH",
-  "skillsAllowlistPath": "$CLAWDBOT_SKILLS_ALLOWLIST_PATH",
-  "skillsSyncEnabled": "$CLAWDBOT_SKILLS_SYNC_ENABLED",
-  "skillsSyncIntervalSeconds": "$CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS",
-  "verifyRuntime": "$CLAWDBOT_VERIFY_RUNTIME",
-  "runDoctor": "$CLAWDBOT_RUN_DOCTOR",
-  "syncConfigFromEnv": "$CLAWDBOT_SYNC_CONFIG_FROM_ENV",
+  "skillsAllowlistPath": "$OPENCLAW_SKILLS_ALLOWLIST_PATH",
+  "skillsSyncEnabled": "$OPENCLAW_SKILLS_SYNC_ENABLED",
+  "skillsSyncIntervalSeconds": "$OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS",
+  "verifyRuntime": "$OPENCLAW_VERIFY_RUNTIME",
+  "runDoctor": "$OPENCLAW_RUN_DOCTOR",
+  "syncConfigFromEnv": "$OPENCLAW_SYNC_CONFIG_FROM_ENV",
   "llmModel": "$OPENCLAW_LLM_MODEL",
   "llmBaseUrl": "$OPENCLAW_LLM_BASE_URL",
   "setupPassword": "auto-or-env",
-  "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
+  "vkEnabled": "${OPENCLAW_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON
-chown openclaw:openclaw "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" || true
+chown openclaw:openclaw "$OPENCLAW_STATE_DIR/client-pack.manifest.json" || true
 
 log "OpenClaw version: $(node "${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}" --version 2>/dev/null || true)"
 exec gosu openclaw node /app/src/server.js

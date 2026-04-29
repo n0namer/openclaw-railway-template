@@ -23,8 +23,8 @@ function stringFromEnv(name, fallback = '') {
 }
 
 function replacementMap() {
-  const vkEnabled = isTrue(process.env.CLAWDBOT_ENABLE_VK);
-  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
+  const vkEnabled = isTrue(process.env.OPENCLAW_ENABLE_VK);
+  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('OPENCLAW_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
   const llmBaseUrl = stringFromEnv('OPENCLAW_LLM_BASE_URL', 'https://api.deepseek.com');
   const openclawVersion = stringFromEnv('OPENCLAW_VERSION', '2026.4.23');
   const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/.openclaw/extensions');
@@ -34,12 +34,12 @@ function replacementMap() {
 
   return {
     OPENCLAW_VERSION: openclawVersion,
-    CLAWDBOT_RENDERED_AT: renderedAt,
+    OPENCLAW_RENDERED_AT: renderedAt,
     DEEPSEEK_API_KEY: stringFromEnv('DEEPSEEK_API_KEY'),
     OPENCLAW_LLM_MODEL: defaultModel,
     OPENCLAW_LLM_BASE_URL: llmBaseUrl,
-    CLAWDBOT_DEFAULT_MODEL: defaultModel,
-    CLAWDBOT_ENABLE_VK_BOOL: vkEnabled,
+    OPENCLAW_DEFAULT_MODEL: defaultModel,
+    OPENCLAW_ENABLE_VK_BOOL: vkEnabled,
     OPENCLAW_PLUGINS_DIR: pluginsDir,
     INTERNAL_GATEWAY_PORT_NUMBER: numberFromEnv('INTERNAL_GATEWAY_PORT', 18789),
     INTERNAL_GATEWAY_BIND: gatewayBind,
@@ -88,7 +88,7 @@ function main() {
   const rendered = replaceTemplate(raw, vars);
   const parsed = JSON.parse(rendered);
 
-  const vkEnabled = isTrue(process.env.CLAWDBOT_ENABLE_VK);
+  const vkEnabled = isTrue(process.env.OPENCLAW_ENABLE_VK);
   parsed.channels ??= {};
   parsed.channels.vk ??= {};
   parsed.channels.vk.enabled = vkEnabled;
@@ -111,7 +111,7 @@ function main() {
   parsed.agents ??= {};
   parsed.agents.defaults ??= {};
   parsed.agents.defaults.model ??= {};
-  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
+  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('OPENCLAW_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
   const llmBaseUrl = stringFromEnv('OPENCLAW_LLM_BASE_URL', 'https://api.deepseek.com');
   parsed.agents.defaults.model.primary = defaultModel;
   parsed.agents.defaults.models ??= {};

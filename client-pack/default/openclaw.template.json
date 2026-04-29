@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastTouchedVersion": "${OPENCLAW_VERSION}",
-    "lastTouchedAt": "${CLAWDBOT_RENDERED_AT}"
+    "lastTouchedAt": "${OPENCLAW_RENDERED_AT}"
   },
   "env": {
     "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
@@ -13,10 +13,10 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "${CLAWDBOT_DEFAULT_MODEL}"
+        "primary": "${OPENCLAW_DEFAULT_MODEL}"
       },
       "models": {
-        "${CLAWDBOT_DEFAULT_MODEL}": {}
+        "${OPENCLAW_DEFAULT_MODEL}": {}
       },
       "compaction": {
         "mode": "safeguard"
@@ -37,13 +37,13 @@
     },
     "entries": {
       "vk": {
-        "enabled": "${CLAWDBOT_ENABLE_VK_BOOL}"
+        "enabled": "${OPENCLAW_ENABLE_VK_BOOL}"
       }
     }
   },
   "channels": {
     "vk": {
-      "enabled": "${CLAWDBOT_ENABLE_VK_BOOL}"
+      "enabled": "${OPENCLAW_ENABLE_VK_BOOL}"
     }
   },
   "commands": {
