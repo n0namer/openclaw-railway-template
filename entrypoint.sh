@@ -29,6 +29,10 @@ export CLAWDBOT_SKILLS_SYNC_ENABLED="${CLAWDBOT_SKILLS_SYNC_ENABLED:-true}"
 export CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS="${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
 export CLAWDBOT_SKILLS_UPDATE_ALL="${CLAWDBOT_SKILLS_UPDATE_ALL:-false}"
 export CLAWDBOT_SKILLS_ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWDBOT_STATE_DIR}/skills.allowlist}"
+export CLAWDBOT_VERIFY_RUNTIME="${CLAWDBOT_VERIFY_RUNTIME:-true}"
+export CLAWDBOT_DEFAULT_PROVIDER="${CLAWDBOT_DEFAULT_PROVIDER:-deepseek}"
+export CLAWDBOT_DEFAULT_MODEL="${CLAWDBOT_DEFAULT_MODEL:-deepseek/deepseek-chat}"
+export CLAWDBOT_VERIFY_LIVE_MODEL="${CLAWDBOT_VERIFY_LIVE_MODEL:-false}"
 export CLAWDBOT_ENABLE_VK="${CLAWDBOT_ENABLE_VK:-false}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
 export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
@@ -82,7 +86,6 @@ if [ ! -d /data/.linuxbrew ]; then
   log 'copy Homebrew to persistent volume'
   cp -a /home/linuxbrew/.linuxbrew /data/.linuxbrew
 fi
-
 rm -rf /home/linuxbrew/.linuxbrew
 ln -sfn /data/.linuxbrew /home/linuxbrew/.linuxbrew
 
@@ -92,7 +95,6 @@ seed_skills_allowlist_if_missing() {
     log "preserve existing skills allowlist: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
     return 0
   fi
-
   mkdir -p "$(dirname "$CLAWDBOT_SKILLS_ALLOWLIST_PATH")"
   if [ -f "$source_list" ]; then
     log "seed skills allowlist from client pack: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
@@ -208,6 +210,22 @@ sync_skills_once() {
   gosu openclaw bash /app/client-pack/sync-skills.sh once || log 'warning: skills sync once failed'
 }
 
+verify_runtime() {
+  if ! is_true "$CLAWDBOT_VERIFY_RUNTIME"; then
+    log 'skip runtime verifier'
+    return 0
+  fi
+  if [ ! -f /app/client-pack/verify-runtime.sh ]; then
+    log 'warning: runtime verifier missing'
+    return 0
+  fi
+  log 'run runtime verifier'
+  gosu openclaw bash /app/client-pack/verify-runtime.sh || {
+    log 'ERROR: runtime verifier failed'
+    exit 1
+  }
+}
+
 start_skills_sync_daemon() {
   if ! is_true "$CLAWDBOT_SKILLS_SYNC_ENABLED"; then
     log 'skip skills hot-sync daemon'
@@ -262,6 +280,7 @@ seed_skills_allowlist_if_missing
 render_config_if_missing
 sync_skills_once
 bootstrap_plugins
+verify_runtime
 start_skills_sync_daemon
 
 cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
@@ -273,6 +292,9 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "skillsAllowlistPath": "$CLAWDBOT_SKILLS_ALLOWLIST_PATH",
   "skillsSyncEnabled": "$CLAWDBOT_SKILLS_SYNC_ENABLED",
   "skillsSyncIntervalSeconds": "$CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS",
+  "verifyRuntime": "$CLAWDBOT_VERIFY_RUNTIME",
+  "defaultProvider": "$CLAWDBOT_DEFAULT_PROVIDER",
+  "defaultModel": "$CLAWDBOT_DEFAULT_MODEL",
   "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
