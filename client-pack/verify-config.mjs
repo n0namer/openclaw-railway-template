@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const configPath = process.env.OPENCLAW_CONFIG_PATH || '/data/.openclaw/openclaw.json';
 const defaultModel = process.env.CLAWDBOT_DEFAULT_MODEL || 'deepseek/deepseek-chat';
 const vkEnabled = /^(true|1|yes|on)$/i.test(process.env.CLAWDBOT_ENABLE_VK || 'false');
-const pluginRoot = process.env.OPENCLAW_PLUGINS_DIR || '/data/openclaw-plugins';
+const pluginRoot = process.env.OPENCLAW_PLUGINS_DIR || '/data/.openclaw/extensions';
 
 function log(message) {
   console.log(`[verify-config] ${message}`);
