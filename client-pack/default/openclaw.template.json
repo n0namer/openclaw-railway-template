@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "lastTouchedVersion": "${OPENCLAW_VERSION}",
+    "lastTouchedAt": "${CLAWDBOT_RENDERED_AT}"
+  },
+  "env": {
+    "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
+    "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+    "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+    "LITELLM_API_KEY": "${LITELLM_API_KEY}",
+    "CUSTOM_API_KEY": "${CUSTOM_API_KEY}"
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "${CLAWDBOT_DEFAULT_MODEL}"
+      },
+      "models": {
+        "${CLAWDBOT_DEFAULT_MODEL}": {}
+      },
+      "compaction": {
+        "mode": "safeguard"
+      }
+    },
+    "list": [
+      {
+        "id": "main"
+      }
+    ]
+  },
+  "plugins": {
+    "enabled": true,
+    "load": {
+      "paths": [
+        "${OPENCLAW_PLUGINS_DIR}"
+      ]
+    },
+    "entries": {
+      "vk": {
+        "enabled": "${CLAWDBOT_ENABLE_VK_BOOL}"
+      }
+    }
+  },
+  "channels": {
+    "vk": {
+      "enabled": "${CLAWDBOT_ENABLE_VK_BOOL}"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true
+  },
+  "gateway": {
+    "port": "${INTERNAL_GATEWAY_PORT_NUMBER}",
+    "mode": "local",
+    "bind": "${INTERNAL_GATEWAY_BIND}",
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
+    "trustedProxies": [
+      "100.64.0.0/10",
+      "127.0.0.1"
+    ]
+  },
+  "skills": {
+    "entries": {
+      "bmad": {
+        "enabled": true
+      }
+    }
+  }
+}
