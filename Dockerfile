@@ -1,6 +1,9 @@
 FROM node:24-bookworm
 
-ARG OPENCLAW_VERSION
+ARG OPENCLAW_VERSION=2026.4.23
+ENV OPENCLAW_VERSION=${OPENCLAW_VERSION}
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -15,10 +18,11 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
-  OPENCLAW_VERSION="${OPENCLAW_VERSION:-2026.4.23}"; \
   npm install -g "openclaw@${OPENCLAW_VERSION}" clawhub@latest; \
   mkdir -p /opt/clawdbot; \
-  printf '%s\n' "${OPENCLAW_VERSION}" > /opt/clawdbot/openclaw-version
+  printf '%s\n' "${OPENCLAW_VERSION}" > /opt/clawdbot/openclaw-version; \
+  openclaw --version || true; \
+  clawhub --version || true
 
 WORKDIR /app
 
