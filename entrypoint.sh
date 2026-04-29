@@ -30,6 +30,8 @@ export CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS="${CLAWDBOT_SKILLS_SYNC_INTERVAL_SE
 export CLAWDBOT_SKILLS_UPDATE_ALL="${CLAWDBOT_SKILLS_UPDATE_ALL:-false}"
 export CLAWDBOT_SKILLS_ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWDBOT_STATE_DIR}/skills.allowlist}"
 export CLAWDBOT_VERIFY_RUNTIME="${CLAWDBOT_VERIFY_RUNTIME:-true}"
+export CLAWDBOT_RUN_DOCTOR="${CLAWDBOT_RUN_DOCTOR:-true}"
+export CLAWDBOT_SYNC_CONFIG_FROM_ENV="${CLAWDBOT_SYNC_CONFIG_FROM_ENV:-true}"
 export CLAWDBOT_DEFAULT_PROVIDER="${CLAWDBOT_DEFAULT_PROVIDER:-deepseek}"
 export CLAWDBOT_DEFAULT_MODEL="${CLAWDBOT_DEFAULT_MODEL:-deepseek/deepseek-chat}"
 export CLAWDBOT_VERIFY_LIVE_MODEL="${CLAWDBOT_VERIFY_LIVE_MODEL:-false}"
@@ -81,6 +83,30 @@ mkdir -p \
   "$PNPM_HOME" \
   "$PNPM_STORE_DIR" \
   /data/backups
+
+ensure_gateway_token() {
+  local token_file="$CLAWDBOT_STATE_DIR/openclaw_gateway_token"
+
+  if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ] && [ -n "${CLAWDBOT_GATEWAY_TOKEN:-}" ]; then
+    log 'warning: CLAWDBOT_GATEWAY_TOKEN is deprecated; use OPENCLAW_GATEWAY_TOKEN'
+    export OPENCLAW_GATEWAY_TOKEN="$CLAWDBOT_GATEWAY_TOKEN"
+  fi
+
+  if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]; then
+    if [ -f "$token_file" ]; then
+      export OPENCLAW_GATEWAY_TOKEN="$(cat "$token_file")"
+      log 'loaded persisted OPENCLAW_GATEWAY_TOKEN from /data'
+    else
+      export OPENCLAW_GATEWAY_TOKEN="$(node -e "process.stdout.write(require('crypto').randomBytes(48).toString('base64url'))")"
+      umask 077
+      printf '%s\n' "$OPENCLAW_GATEWAY_TOKEN" > "$token_file"
+      chmod 600 "$token_file" || true
+      log 'generated and persisted OPENCLAW_GATEWAY_TOKEN on /data'
+    fi
+  else
+    log 'using OPENCLAW_GATEWAY_TOKEN from environment'
+  fi
+}
 
 if [ ! -d /data/.linuxbrew ]; then
   log 'copy Homebrew to persistent volume'
@@ -144,6 +170,35 @@ render_config_if_missing() {
     node /app/client-pack/render-openclaw-config.mjs > "$OPENCLAW_CONFIG_PATH"
   fi
   chmod 600 "$OPENCLAW_CONFIG_PATH" || true
+}
+
+sync_config_from_env() {
+  if ! is_true "$CLAWDBOT_SYNC_CONFIG_FROM_ENV"; then
+    log 'skip config env sync'
+    return 0
+  fi
+  if [ ! -f /app/client-pack/sync-config-from-env.mjs ]; then
+    log 'warning: config env sync script missing'
+    return 0
+  fi
+  log 'sync selected environment values into OpenClaw config'
+  node /app/client-pack/sync-config-from-env.mjs || {
+    log 'ERROR: config env sync failed'
+    exit 1
+  }
+}
+
+run_doctor() {
+  if ! is_true "$CLAWDBOT_RUN_DOCTOR"; then
+    log 'skip OpenClaw doctor'
+    return 0
+  fi
+  log 'run OpenClaw doctor --non-interactive'
+  cd "$OPENCLAW_WORKSPACE_DIR"
+  gosu openclaw $OPENCLAW_BIN doctor --non-interactive || {
+    log 'ERROR: OpenClaw doctor failed'
+    exit 1
+  }
 }
 
 safe_marker_name() {
@@ -272,14 +327,17 @@ else
   cp -a "$CLIENT_PACK_DIR" "$CLAWDBOT_STATE_DIR/templates/${CLAWDBOT_CLIENT_PACK}" 2>/dev/null || true
 fi
 
+ensure_gateway_token
 chown -R openclaw:openclaw /data
 chmod 700 /data
 cd "$OPENCLAW_WORKSPACE_DIR"
 
 seed_skills_allowlist_if_missing
 render_config_if_missing
+sync_config_from_env
 sync_skills_once
 bootstrap_plugins
+run_doctor
 verify_runtime
 start_skills_sync_daemon
 
@@ -293,6 +351,8 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "skillsSyncEnabled": "$CLAWDBOT_SKILLS_SYNC_ENABLED",
   "skillsSyncIntervalSeconds": "$CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS",
   "verifyRuntime": "$CLAWDBOT_VERIFY_RUNTIME",
+  "runDoctor": "$CLAWDBOT_RUN_DOCTOR",
+  "syncConfigFromEnv": "$CLAWDBOT_SYNC_CONFIG_FROM_ENV",
   "defaultProvider": "$CLAWDBOT_DEFAULT_PROVIDER",
   "defaultModel": "$CLAWDBOT_DEFAULT_MODEL",
   "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
