@@ -65,6 +65,21 @@ validate_config_if_present() {
   log "config valid"
 }
 
+verify_config_invariants() {
+  if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+    warn "skip config invariant verifier: config missing"
+    return 0
+  fi
+  if [ ! -f /app/client-pack/verify-config.mjs ]; then
+    warn "skip config invariant verifier: /app/client-pack/verify-config.mjs missing"
+    return 0
+  fi
+
+  log "run config invariant verifier"
+  node /app/client-pack/verify-config.mjs >> "$LOG_FILE" 2>&1 || fail "config invariant verifier failed"
+  log "config invariants valid"
+}
+
 ensure_deepseek_default_model() {
   if [ "$CLAWDBOT_DEFAULT_PROVIDER" != "deepseek" ]; then
     log "default provider is not deepseek; skip DeepSeek checks: $CLAWDBOT_DEFAULT_PROVIDER"
@@ -143,6 +158,7 @@ main() {
   validate_config_if_present
   ensure_deepseek_default_model
   validate_config_if_present
+  verify_config_invariants
   verify_vk_inputs
 
   log "verify ok"
