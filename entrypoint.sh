@@ -5,6 +5,13 @@ log() {
   printf '[clawdbot-entrypoint] %s\n' "$*"
 }
 
+is_true() {
+  case "${1:-}" in
+    true|TRUE|1|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-/data/.openclaw}"
 export OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-/data/workspace}"
 export OPENCLAW_CONFIG_PATH="${OPENCLAW_CONFIG_PATH:-${OPENCLAW_STATE_DIR}/openclaw.json}"
@@ -18,6 +25,7 @@ export CLAWDBOT_CLIENT_PACK="${CLAWDBOT_CLIENT_PACK:-default}"
 export CLAWDBOT_AUTO_CONFIG="${CLAWDBOT_AUTO_CONFIG:-auto}"
 export CLAWDBOT_BOOTSTRAP_SKILLS="${CLAWDBOT_BOOTSTRAP_SKILLS:-true}"
 export CLAWDBOT_BOOTSTRAP_PLUGINS="${CLAWDBOT_BOOTSTRAP_PLUGINS:-true}"
+export CLAWDBOT_ENABLE_VK="${CLAWDBOT_ENABLE_VK:-false}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
 export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
 export SELF_HEAL_MAX_ATTEMPTS="${SELF_HEAL_MAX_ATTEMPTS:-3}"
@@ -86,6 +94,11 @@ render_config_if_missing() {
     return 0
   fi
 
+  if [ ! -f /app/client-pack/render-openclaw-config.mjs ]; then
+    log "warning: config renderer missing; skip auto config"
+    return 0
+  fi
+
   log "create first-boot OpenClaw config: $OPENCLAW_CONFIG_PATH"
   mkdir -p "$(dirname "$OPENCLAW_CONFIG_PATH")"
   if [ -f "$CLIENT_PACK_DIR/openclaw.template.json" ]; then
@@ -105,9 +118,9 @@ install_skill_once() {
   [ -z "$spec" ] && return 0
   case "$spec" in \#*) return 0 ;; esac
 
-  local marker_name
+  local marker_name marker
   marker_name="$(safe_marker_name "$spec")"
-  local marker="$CLAWDBOT_STATE_DIR/installed-skills/${marker_name}.done"
+  marker="$CLAWDBOT_STATE_DIR/installed-skills/${marker_name}.done"
 
   if [ -f "$marker" ]; then
     log "skill already installed: $spec"
@@ -129,15 +142,15 @@ install_plugin_once() {
   [ -z "$line" ] && return 0
   case "$line" in \#*) return 0 ;; esac
 
-  local spec="${line%%|*}"
-  local plugin_id=""
+  local spec plugin_id marker_name marker
+  spec="${line%%|*}"
+  plugin_id=""
   if [ "$line" != "$spec" ]; then
     plugin_id="${line#*|}"
   fi
 
-  local marker_name
   marker_name="$(safe_marker_name "$spec")"
-  local marker="$CLAWDBOT_STATE_DIR/installed-plugins/${marker_name}.done"
+  marker="$CLAWDBOT_STATE_DIR/installed-plugins/${marker_name}.done"
 
   if [ ! -f "$marker" ]; then
     log "install OpenClaw plugin: $spec"
@@ -159,7 +172,7 @@ install_plugin_once() {
 }
 
 bootstrap_skills() {
-  if [ "$CLAWDBOT_BOOTSTRAP_SKILLS" != "true" ]; then
+  if ! is_true "$CLAWDBOT_BOOTSTRAP_SKILLS"; then
     log 'skip skills bootstrap'
     return 0
   fi
@@ -175,10 +188,21 @@ bootstrap_skills() {
 }
 
 bootstrap_plugins() {
-  if [ "$CLAWDBOT_BOOTSTRAP_PLUGINS" != "true" ]; then
+  if ! is_true "$CLAWDBOT_BOOTSTRAP_PLUGINS"; then
     log 'skip plugins bootstrap'
     return 0
   fi
+
+  if is_true "$CLAWDBOT_ENABLE_VK"; then
+    export VK_GROUP_TOKEN="${VK_GROUP_TOKEN:-${VK_COMMUNITY_TOKEN:-}}"
+    if [ -z "${VK_GROUP_TOKEN:-}" ] || [ -z "${VK_GROUP_ID:-}" ]; then
+      log 'warning: CLAWDBOT_ENABLE_VK=true, but VK_COMMUNITY_TOKEN/VK_GROUP_ID is missing'
+    fi
+    install_plugin_once 'clawhub:vk-plugin|vk' || true
+  else
+    log 'skip VK plugin: CLAWDBOT_ENABLE_VK=false'
+  fi
+
   local list_file="$CLIENT_PACK_DIR/plugins.list"
   if [ ! -f "$list_file" ]; then
     log "plugins list not found: $list_file"
@@ -209,6 +233,7 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "stateDir": "$OPENCLAW_STATE_DIR",
   "workspaceDir": "$OPENCLAW_WORKSPACE_DIR",
   "configPath": "$OPENCLAW_CONFIG_PATH",
+  "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON
