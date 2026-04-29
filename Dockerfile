@@ -31,8 +31,8 @@ COPY --chmod=755 entrypoint.sh ./entrypoint.sh
 
 RUN useradd -m -s /bin/bash openclaw \
   && chown -R openclaw:openclaw /app /opt/clawdbot \
-  && mkdir -p /data /home/linuxbrew/.linuxbrew \
-  && chown -R openclaw:openclaw /data /home/linuxbrew
+  && mkdir -p /home/linuxbrew/.linuxbrew \
+  && chown -R openclaw:openclaw /home/linuxbrew
 
 USER openclaw
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -57,11 +57,15 @@ ENV CLAWDBOT_CLIENT_PACK=default
 ENV CLAWDBOT_AUTO_CONFIG=auto
 ENV CLAWDBOT_BOOTSTRAP_SKILLS=true
 ENV CLAWDBOT_BOOTSTRAP_PLUGINS=true
+ENV CLAWDBOT_SKILLS_SYNC_ENABLED=true
+ENV CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS=1800
+ENV CLAWDBOT_SKILLS_UPDATE_ALL=false
+ENV CLAWDBOT_SKILLS_ALLOWLIST_PATH=/data/.clawdbot/skills.allowlist
+ENV CLAWDBOT_ENABLE_VK=false
 ENV INTERNAL_GATEWAY_BIND=lan
 ENV INTERNAL_GATEWAY_PORT=18789
 ENV SELF_HEAL_MAX_ATTEMPTS=3
 ENV TELEGRAM_ENABLED=false
-ENV VK_ENABLED=true
 ENV NPM_CONFIG_CACHE=/data/npm-cache
 ENV NPM_CONFIG_PREFIX=/data/npm
 ENV PNPM_HOME=/data/pnpm
