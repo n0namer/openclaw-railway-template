@@ -18,13 +18,14 @@ function numberFromEnv(name, fallback) {
 
 function stringFromEnv(name, fallback = '') {
   const value = process.env[name];
-  if (value == null) return fallback;
+  if (value == null || value === '') return fallback;
   return String(value);
 }
 
 function replacementMap() {
   const vkEnabled = isTrue(process.env.CLAWDBOT_ENABLE_VK);
-  const defaultModel = stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat');
+  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
+  const llmBaseUrl = stringFromEnv('OPENCLAW_LLM_BASE_URL', 'https://api.deepseek.com');
   const openclawVersion = stringFromEnv('OPENCLAW_VERSION', '2026.4.23');
   const pluginsDir = stringFromEnv('OPENCLAW_PLUGINS_DIR', '/data/.openclaw/extensions');
   const gatewayToken = stringFromEnv('OPENCLAW_GATEWAY_TOKEN', '');
@@ -35,10 +36,8 @@ function replacementMap() {
     OPENCLAW_VERSION: openclawVersion,
     CLAWDBOT_RENDERED_AT: renderedAt,
     DEEPSEEK_API_KEY: stringFromEnv('DEEPSEEK_API_KEY'),
-    OPENAI_API_KEY: stringFromEnv('OPENAI_API_KEY'),
-    OPENROUTER_API_KEY: stringFromEnv('OPENROUTER_API_KEY'),
-    LITELLM_API_KEY: stringFromEnv('LITELLM_API_KEY'),
-    CUSTOM_API_KEY: stringFromEnv('CUSTOM_API_KEY'),
+    OPENCLAW_LLM_MODEL: defaultModel,
+    OPENCLAW_LLM_BASE_URL: llmBaseUrl,
     CLAWDBOT_DEFAULT_MODEL: defaultModel,
     CLAWDBOT_ENABLE_VK_BOOL: vkEnabled,
     OPENCLAW_PLUGINS_DIR: pluginsDir,
@@ -60,12 +59,35 @@ function replaceTemplate(raw, vars) {
   return rendered;
 }
 
+function ensureDeepSeekProvider(parsed, defaultModel, baseUrl) {
+  parsed.models ??= {};
+  parsed.models.mode ??= 'merge';
+  parsed.models.providers ??= {};
+  parsed.models.providers.deepseek ??= {};
+  parsed.models.providers.deepseek.baseUrl = baseUrl;
+  parsed.models.providers.deepseek.api = 'openai-completions';
+  parsed.models.providers.deepseek.models ??= [];
+
+  const [, modelId = defaultModel] = defaultModel.split('/', 2);
+  if (!parsed.models.providers.deepseek.models.some((item) => item && item.id === modelId)) {
+    parsed.models.providers.deepseek.models.push({
+      id: modelId,
+      name: modelId,
+      reasoning: false,
+      input: ['text'],
+      contextWindow: 128000,
+      contextTokens: 96000,
+      maxTokens: 8192,
+    });
+  }
+}
+
 function main() {
   const raw = fs.readFileSync(inputPath, 'utf8');
-  const rendered = replaceTemplate(raw, replacementMap());
+  const vars = replacementMap();
+  const rendered = replaceTemplate(raw, vars);
   const parsed = JSON.parse(rendered);
 
-  // Keep VK config deterministic: disabled means explicit false, enabled means explicit true.
   const vkEnabled = isTrue(process.env.CLAWDBOT_ENABLE_VK);
   parsed.channels ??= {};
   parsed.channels.vk ??= {};
@@ -89,7 +111,8 @@ function main() {
   parsed.agents ??= {};
   parsed.agents.defaults ??= {};
   parsed.agents.defaults.model ??= {};
-  const defaultModel = stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat');
+  const defaultModel = stringFromEnv('OPENCLAW_LLM_MODEL', stringFromEnv('CLAWDBOT_DEFAULT_MODEL', 'deepseek/deepseek-chat'));
+  const llmBaseUrl = stringFromEnv('OPENCLAW_LLM_BASE_URL', 'https://api.deepseek.com');
   parsed.agents.defaults.model.primary = defaultModel;
   parsed.agents.defaults.models ??= {};
   parsed.agents.defaults.models[defaultModel] ??= {};
@@ -101,6 +124,7 @@ function main() {
     }
   }
 
+  ensureDeepSeekProvider(parsed, defaultModel, llmBaseUrl);
   process.stdout.write(`${JSON.stringify(parsed, null, 2)}\n`);
 }
 
