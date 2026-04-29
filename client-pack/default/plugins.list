@@ -1,0 +1,6 @@
+# ClawdBot Client Pack v0.1
+# One plugin per line.
+# Format: <install-spec>|<plugin-id-for-enable>
+# Example only after exact ClawHub/npm package is verified:
+# clawhub:openclaw-channel-vk|openclaw-channel-vk
+
