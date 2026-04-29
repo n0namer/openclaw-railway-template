@@ -25,6 +25,10 @@ export CLAWDBOT_CLIENT_PACK="${CLAWDBOT_CLIENT_PACK:-default}"
 export CLAWDBOT_AUTO_CONFIG="${CLAWDBOT_AUTO_CONFIG:-auto}"
 export CLAWDBOT_BOOTSTRAP_SKILLS="${CLAWDBOT_BOOTSTRAP_SKILLS:-true}"
 export CLAWDBOT_BOOTSTRAP_PLUGINS="${CLAWDBOT_BOOTSTRAP_PLUGINS:-true}"
+export CLAWDBOT_SKILLS_SYNC_ENABLED="${CLAWDBOT_SKILLS_SYNC_ENABLED:-true}"
+export CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS="${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS:-1800}"
+export CLAWDBOT_SKILLS_UPDATE_ALL="${CLAWDBOT_SKILLS_UPDATE_ALL:-false}"
+export CLAWDBOT_SKILLS_ALLOWLIST_PATH="${CLAWDBOT_SKILLS_ALLOWLIST_PATH:-${CLAWDBOT_STATE_DIR}/skills.allowlist}"
 export CLAWDBOT_ENABLE_VK="${CLAWDBOT_ENABLE_VK:-false}"
 export INTERNAL_GATEWAY_BIND="${INTERNAL_GATEWAY_BIND:-lan}"
 export INTERNAL_GATEWAY_PORT="${INTERNAL_GATEWAY_PORT:-18789}"
@@ -49,6 +53,7 @@ mkdir -p \
   "$CLAWDBOT_STATE_DIR/installed-skills" \
   "$CLAWDBOT_STATE_DIR/installed-plugins" \
   "$CLAWDBOT_STATE_DIR/templates" \
+  "$CLAWDBOT_STATE_DIR/logs" \
   "$OPENCLAW_WORKSPACE_DIR/skills" \
   "$OPENCLAW_WORKSPACE_DIR/plugins" \
   "$OPENCLAW_WORKSPACE_DIR/agents" \
@@ -67,6 +72,23 @@ fi
 
 rm -rf /home/linuxbrew/.linuxbrew
 ln -sfn /data/.linuxbrew /home/linuxbrew/.linuxbrew
+
+seed_skills_allowlist_if_missing() {
+  local source_list="$CLIENT_PACK_DIR/skills.list"
+  if [ -f "$CLAWDBOT_SKILLS_ALLOWLIST_PATH" ]; then
+    log "preserve existing skills allowlist: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$CLAWDBOT_SKILLS_ALLOWLIST_PATH")"
+  if [ -f "$source_list" ]; then
+    log "seed skills allowlist from client pack: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+    cp -a "$source_list" "$CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+  else
+    log "create empty skills allowlist: $CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+    touch "$CLAWDBOT_SKILLS_ALLOWLIST_PATH"
+  fi
+}
 
 render_config_if_missing() {
   if [ -f "$OPENCLAW_CONFIG_PATH" ]; then
@@ -113,30 +135,6 @@ safe_marker_name() {
   printf '%s' "$1" | sed 's#[^A-Za-z0-9_.-]#__#g'
 }
 
-install_skill_once() {
-  local spec="$1"
-  [ -z "$spec" ] && return 0
-  case "$spec" in \#*) return 0 ;; esac
-
-  local marker_name marker
-  marker_name="$(safe_marker_name "$spec")"
-  marker="$CLAWDBOT_STATE_DIR/installed-skills/${marker_name}.done"
-
-  if [ -f "$marker" ]; then
-    log "skill already installed: $spec"
-    return 0
-  fi
-
-  log "install ClawHub skill: $spec"
-  if gosu openclaw $OPENCLAW_BIN skills install "$spec"; then
-    mkdir -p "$(dirname "$marker")"
-    date -u +%Y-%m-%dT%H:%M:%SZ > "$marker"
-  else
-    log "warning: skill install failed: $spec"
-    return 1
-  fi
-}
-
 install_plugin_once() {
   local line="$1"
   [ -z "$line" ] && return 0
@@ -171,20 +169,29 @@ install_plugin_once() {
   fi
 }
 
-bootstrap_skills() {
+sync_skills_once() {
   if ! is_true "$CLAWDBOT_BOOTSTRAP_SKILLS"; then
     log 'skip skills bootstrap'
     return 0
   fi
-  local list_file="$CLIENT_PACK_DIR/skills.list"
-  if [ ! -f "$list_file" ]; then
-    log "skills list not found: $list_file"
+  if [ ! -f /app/client-pack/sync-skills.sh ]; then
+    log 'warning: skills sync script missing'
     return 0
   fi
-  while IFS= read -r raw_line || [ -n "$raw_line" ]; do
-    line="$(printf '%s' "$raw_line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-    install_skill_once "$line" || true
-  done < "$list_file"
+  gosu openclaw bash /app/client-pack/sync-skills.sh once || log 'warning: skills sync once failed'
+}
+
+start_skills_sync_daemon() {
+  if ! is_true "$CLAWDBOT_SKILLS_SYNC_ENABLED"; then
+    log 'skip skills hot-sync daemon'
+    return 0
+  fi
+  if [ ! -f /app/client-pack/sync-skills.sh ]; then
+    log 'warning: skills sync script missing'
+    return 0
+  fi
+  log "start skills hot-sync daemon, interval=${CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS}s"
+  gosu openclaw bash /app/client-pack/sync-skills.sh daemon >> "$CLAWDBOT_STATE_DIR/logs/skills-sync-daemon.log" 2>&1 &
 }
 
 bootstrap_plugins() {
@@ -223,9 +230,11 @@ fi
 chown -R openclaw:openclaw /data
 chmod 700 /data
 
+seed_skills_allowlist_if_missing
 render_config_if_missing
-bootstrap_skills
+sync_skills_once
 bootstrap_plugins
+start_skills_sync_daemon
 
 cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
 {
@@ -233,6 +242,9 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "stateDir": "$OPENCLAW_STATE_DIR",
   "workspaceDir": "$OPENCLAW_WORKSPACE_DIR",
   "configPath": "$OPENCLAW_CONFIG_PATH",
+  "skillsAllowlistPath": "$CLAWDBOT_SKILLS_ALLOWLIST_PATH",
+  "skillsSyncEnabled": "$CLAWDBOT_SKILLS_SYNC_ENABLED",
+  "skillsSyncIntervalSeconds": "$CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS",
   "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
