@@ -42,6 +42,12 @@ export PATH="${NPM_CONFIG_PREFIX}/bin:${PNPM_HOME}:${PATH}"
 CLIENT_PACK_DIR="/app/client-pack/${CLAWDBOT_CLIENT_PACK}"
 OPENCLAW_BIN="node ${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}"
 
+if [ "${RAILWAY_VOLUME_MOUNT_PATH:-/data}" != "/data" ]; then
+  log "ERROR: Railway volume must be mounted at /data"
+  log "RAILWAY_VOLUME_MOUNT_PATH=${RAILWAY_VOLUME_MOUNT_PATH:-unset}"
+  exit 1
+fi
+
 mkdir -p \
   "$OPENCLAW_STATE_DIR" \
   "$OPENCLAW_WORKSPACE_DIR" \
@@ -54,6 +60,7 @@ mkdir -p \
   "$CLAWDBOT_STATE_DIR/installed-plugins" \
   "$CLAWDBOT_STATE_DIR/templates" \
   "$CLAWDBOT_STATE_DIR/logs" \
+  "$CLAWDBOT_STATE_DIR/locks" \
   "$OPENCLAW_WORKSPACE_DIR/skills" \
   "$OPENCLAW_WORKSPACE_DIR/plugins" \
   "$OPENCLAW_WORKSPACE_DIR/agents" \
@@ -135,6 +142,18 @@ safe_marker_name() {
   printf '%s' "$1" | sed 's#[^A-Za-z0-9_.-]#__#g'
 }
 
+write_plugin_marker() {
+  local marker="$1"
+  local spec="$2"
+  local tmp="${marker}.tmp.$$"
+  {
+    printf 'spec=%s\n' "$spec"
+    printf 'installed_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf 'openclaw_version=%s\n' "$(node "${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}" --version 2>/dev/null || true)"
+  } > "$tmp"
+  mv "$tmp" "$marker"
+}
+
 install_plugin_once() {
   local line="$1"
   [ -z "$line" ] && return 0
@@ -150,12 +169,14 @@ install_plugin_once() {
   marker_name="$(safe_marker_name "$spec")"
   marker="$CLAWDBOT_STATE_DIR/installed-plugins/${marker_name}.done"
 
+  cd "$OPENCLAW_WORKSPACE_DIR"
   if [ ! -f "$marker" ]; then
     log "install OpenClaw plugin: $spec"
     if gosu openclaw $OPENCLAW_BIN plugins install "$spec"; then
       mkdir -p "$(dirname "$marker")"
-      date -u +%Y-%m-%dT%H:%M:%SZ > "$marker"
+      write_plugin_marker "$marker" "$spec"
     else
+      rm -f "${marker}.tmp."* 2>/dev/null || true
       log "warning: plugin install failed: $spec"
       return 1
     fi
@@ -229,6 +250,7 @@ fi
 
 chown -R openclaw:openclaw /data
 chmod 700 /data
+cd "$OPENCLAW_WORKSPACE_DIR"
 
 seed_skills_allowlist_if_missing
 render_config_if_missing
@@ -252,4 +274,4 @@ JSON
 chown openclaw:openclaw "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" || true
 
 log "OpenClaw version: $(node "${OPENCLAW_ENTRY:-/usr/local/lib/node_modules/openclaw/dist/entry.js}" --version 2>/dev/null || true)"
-exec gosu openclaw node src/server.js
+exec gosu openclaw node /app/src/server.js
