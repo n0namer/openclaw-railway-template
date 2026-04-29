@@ -113,6 +113,25 @@ ensure_gateway_token() {
   fi
 }
 
+ensure_setup_password() {
+  local password_file="$CLAWDBOT_STATE_DIR/setup_password"
+
+  if [ -z "${SETUP_PASSWORD:-}" ]; then
+    if [ -f "$password_file" ]; then
+      export SETUP_PASSWORD="$(cat "$password_file")"
+      log 'loaded persisted SETUP_PASSWORD from /data'
+    else
+      export SETUP_PASSWORD="$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64url'))")"
+      umask 077
+      printf '%s\n' "$SETUP_PASSWORD" > "$password_file"
+      chmod 600 "$password_file" || true
+      log 'generated and persisted SETUP_PASSWORD on /data'
+    fi
+  else
+    log 'using SETUP_PASSWORD from environment'
+  fi
+}
+
 if [ ! -d /data/.linuxbrew ]; then
   log 'copy Homebrew to persistent volume'
   cp -a /home/linuxbrew/.linuxbrew /data/.linuxbrew
@@ -333,6 +352,7 @@ else
 fi
 
 ensure_gateway_token
+ensure_setup_password
 chown -R openclaw:openclaw /data
 chmod 700 /data
 cd "$OPENCLAW_WORKSPACE_DIR"
@@ -360,6 +380,7 @@ cat > "$CLAWDBOT_STATE_DIR/client-pack.manifest.json" <<JSON
   "syncConfigFromEnv": "$CLAWDBOT_SYNC_CONFIG_FROM_ENV",
   "llmModel": "$OPENCLAW_LLM_MODEL",
   "llmBaseUrl": "$OPENCLAW_LLM_BASE_URL",
+  "setupPassword": "auto-or-env",
   "vkEnabled": "${CLAWDBOT_ENABLE_VK}",
   "bootstrappedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
