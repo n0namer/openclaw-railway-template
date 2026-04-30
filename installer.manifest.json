@@ -1,0 +1,97 @@
+{
+  "contract": "openclaw-railway-configure/v1",
+  "description": "Local Railway CLI installer contract for configuring an existing OpenClaw Railway service from this repository.",
+  "requiredFiles": [
+    "Dockerfile",
+    "railway.toml",
+    "entrypoint.sh",
+    "package.json",
+    "pnpm-lock.yaml",
+    "client-pack/render-openclaw-config.mjs",
+    "client-pack/sync-config-from-env.mjs",
+    "client-pack/verify-config.mjs",
+    "client-pack/sync-skills.sh",
+    "client-pack/verify-runtime.sh",
+    "client-pack/default/openclaw.template.json",
+    "client-pack/default/skills.list",
+    "client-pack/default/plugins.list"
+  ],
+  "runtimeScanFiles": [
+    "Dockerfile",
+    "railway.toml",
+    "entrypoint.sh",
+    "client-pack/render-openclaw-config.mjs",
+    "client-pack/sync-config-from-env.mjs",
+    "client-pack/verify-config.mjs",
+    "client-pack/sync-skills.sh",
+    "client-pack/verify-runtime.sh"
+  ],
+  "requiredEnv": [
+    "RAILWAY_SERVICE",
+    "RAILWAY_ENVIRONMENT",
+    "OPENCLAW_LLM_KEY",
+    "OPENCLAW_LLM_MODEL",
+    "OPENCLAW_LLM_BASE_URL",
+    "OPENCLAW_ENABLE_VK"
+  ],
+  "requiredEnvWhenVkEnabled": [
+    "VK_COMMUNITY_TOKEN",
+    "VK_GROUP_ID"
+  ],
+  "railwayVariables": [
+    "OPENCLAW_VERSION",
+    "NODE_ENV",
+    "OPENCLAW_LLM_KEY",
+    "OPENCLAW_LLM_MODEL",
+    "OPENCLAW_LLM_BASE_URL",
+    "OPENCLAW_ENABLE_VK",
+    "VK_COMMUNITY_TOKEN",
+    "VK_GROUP_ID",
+    "OPENCLAW_VERIFY_LIVE_MODEL",
+    "OPENCLAW_RUN_DOCTOR",
+    "OPENCLAW_SYNC_CONFIG_FROM_ENV",
+    "RAILWAY_HEALTHCHECK_TIMEOUT_SEC"
+  ],
+  "canonicalPaths": {
+    "stateDir": "/data/.openclaw",
+    "packStateDir": "/data/.openclaw/client-pack",
+    "workspaceDir": "/data/workspace",
+    "configPath": "/data/.openclaw/openclaw.json",
+    "pluginsDir": "/data/.openclaw/extensions",
+    "skillsAllowlistPath": "/data/.openclaw/client-pack/skills.allowlist"
+  },
+  "forbiddenPatterns": [
+    "<<<<<<<",
+    "=======",
+    ">>>>>>>",
+    "VOLUME [\"/data\"]",
+    "/data/.clawdbot",
+    "/data/openclaw-plugins",
+    "/data/clawdbot-plugins"
+  ],
+  "expectedDockerfileLines": [
+    "ENV OPENCLAW_STATE_DIR=/data/.openclaw",
+    "ENV OPENCLAW_PACK_STATE_DIR=/data/.openclaw/client-pack",
+    "ENV OPENCLAW_CONFIG_PATH=/data/.openclaw/openclaw.json",
+    "ENV OPENCLAW_PLUGINS_DIR=/data/.openclaw/extensions",
+    "ENV OPENCLAW_SKILLS_ALLOWLIST_PATH=/data/.openclaw/client-pack/skills.allowlist",
+    "ENV OPENCLAW_ENABLE_VK=true"
+  ],
+  "expectedRailwayTomlLines": [
+    "builder = \"DOCKERFILE\"",
+    "healthcheckPath = \"/setup/healthz\"",
+    "requiredMountPath = \"/data\""
+  ],
+  "logMarkers": [
+    "[clawdbot-entrypoint]",
+    "generated and persisted OPENCLAW_GATEWAY_TOKEN",
+    "loaded persisted OPENCLAW_GATEWAY_TOKEN",
+    "generated and persisted SETUP_PASSWORD",
+    "loaded persisted SETUP_PASSWORD",
+    "sync selected environment values into OpenClaw config",
+    "run OpenClaw doctor",
+    "[verify-runtime]",
+    "[verify-config]",
+    "ERROR"
+  ]
+}
