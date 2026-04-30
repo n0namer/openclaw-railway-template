@@ -376,17 +376,10 @@ cat > "$OPENCLAW_STATE_DIR/client-pack.manifest.json" <<JSON
   "stateDir": "$OPENCLAW_STATE_DIR",
   "workspaceDir": "$OPENCLAW_WORKSPACE_DIR",
   "configPath": "$OPENCLAW_CONFIG_PATH",
-<<<<<<< HEAD
   "skillsAllowlistPath": "$OPENCLAW_SKILLS_ALLOWLIST_PATH",
   "skillsSyncEnabled": "$OPENCLAW_SKILLS_SYNC_ENABLED",
   "skillsSyncIntervalSeconds": "$OPENCLAW_SKILLS_SYNC_INTERVAL_SECONDS",
   "verifyRuntime": "$OPENCLAW_VERIFY_RUNTIME",
-=======
-  "skillsAllowlistPath": "$CLAWDBOT_SKILLS_ALLOWLIST_PATH",
-  "skillsSyncEnabled": "$CLAWDBOT_SKILLS_SYNC_ENABLED",
-  "skillsSyncIntervalSeconds": "$CLAWDBOT_SKILLS_SYNC_INTERVAL_SECONDS",
-  "verifyRuntime": "$CLAWDBOT_VERIFY_RUNTIME",
->>>>>>> c0804e1ce4a3166ffd105061e0beea6081302ac9
   "runDoctor": "$OPENCLAW_RUN_DOCTOR",
   "syncConfigFromEnv": "$OPENCLAW_SYNC_CONFIG_FROM_ENV",
   "llmModel": "$OPENCLAW_LLM_MODEL",
