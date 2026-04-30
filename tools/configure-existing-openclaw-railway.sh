@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_NAME="configure-existing-openclaw-railway"
-MODE="check"
+MODE="self-check"
 NO_RAILWAY=false
 STRICT=true
 ENV_FILE=".agent.env"
@@ -35,26 +35,27 @@ Usage:
   bash tools/configure-existing-openclaw-railway.sh [mode] [options]
 
 Modes:
-  --check      Run local consistency checks only. Default.
-  --vars       Run checks and set Railway variables.
-  --deploy     Run checks, set Railway variables, then railway up.
-  --redeploy   Run checks, set Railway variables, then railway redeploy.
-  --logs       Collect latest Railway deployment logs.
+  --self-check  Check only the local agent layer. Default.
+  --check       Run full strict repo deploy-readiness checks.
+  --vars        Set Railway variables only. Does not require Dockerfile invariants.
+  --deploy      Run full strict checks, set Railway variables, then railway up.
+  --redeploy    Set Railway variables, then railway redeploy. Does not require Dockerfile invariants.
+  --logs        Collect latest Railway deployment logs only.
 
 Options:
   --env-file PATH   Load env from PATH. Default: .agent.env
   --no-railway      Skip Railway CLI checks and Railway actions.
-  --no-strict       Downgrade some repo consistency checks to warnings. Not allowed for --deploy.
+  --no-strict       Downgrade some repo consistency checks to warnings. Not allowed for --deploy or --check.
   --help            Show this help.
 
-Required local file:
+Local secrets:
   .agent.env        Copy from .agent.env.example and fill locally. Never commit it.
 USAGE
 }
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --check|--vars|--deploy|--redeploy|--logs)
+    --self-check|--check|--vars|--deploy|--redeploy|--logs)
       MODE="${1#--}"
       shift
       ;;
@@ -81,8 +82,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ "$MODE" = "deploy" ] && [ "$STRICT" != "true" ]; then
-  fail "--deploy requires strict checks; remove --no-strict"
+if { [ "$MODE" = "deploy" ] || [ "$MODE" = "check" ]; } && [ "$STRICT" != "true" ]; then
+  fail "--$MODE requires strict checks; remove --no-strict"
 fi
 
 ROOT_DIR="$(pwd)"
@@ -90,11 +91,6 @@ TIMESTAMP="$(date -u +%Y%m%d-%H%M%S)"
 REPORT_FILE="$REPORT_DIR/${TIMESTAMP}-${SCRIPT_NAME}.log"
 
 mkdir -p "$REPORT_DIR"
-
-run_and_log() {
-  log "+ $*"
-  "$@" 2>&1 | tee -a "$REPORT_FILE"
-}
 
 append_report_header() {
   {
@@ -106,12 +102,19 @@ append_report_header() {
   } > "$REPORT_FILE"
 }
 
-load_env() {
-  [ -f "$ENV_FILE" ] || fail "missing $ENV_FILE; copy .agent.env.example to $ENV_FILE and fill it locally"
-  set -a
-  # shellcheck disable=SC1090
-  . "$ENV_FILE"
-  set +a
+load_env_if_needed() {
+  case "$MODE" in
+    self-check)
+      return 0
+      ;;
+    *)
+      [ -f "$ENV_FILE" ] || fail "missing $ENV_FILE; copy .agent.env.example to $ENV_FILE and fill it locally"
+      set -a
+      # shellcheck disable=SC1090
+      . "$ENV_FILE"
+      set +a
+      ;;
+  esac
 }
 
 require_env() {
@@ -161,12 +164,41 @@ count_exact() {
   fi
 }
 
-check_required_files() {
-  log "check required files"
-  require_file "$MANIFEST_FILE"
+node_json_ok() {
+  command -v node >/dev/null 2>&1 || fail "node not found"
+  node -e "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); console.log(process.argv[1] + ' ok')" "$1"
+}
 
+manifest_list() {
+  local key="$1"
+  node -e "const m=require('./${MANIFEST_FILE}'); for (const x of (m['${key}'] || [])) console.log(x)"
+}
+
+check_agent_files() {
+  log "self-check agent files"
+  require_file "$MANIFEST_FILE"
+  require_file ".agent.env.example"
+  require_file "tools/configure-existing-openclaw-railway.sh"
+  require_file "AGENT_CONFIGURE_EXISTING_OPENCLAW.md"
+  require_file ".gitignore"
+
+  bash -n tools/configure-existing-openclaw-railway.sh
+  node_json_ok "$MANIFEST_FILE"
+
+  grep -q '^\.agent\.env$' .gitignore || fail ".gitignore must include .agent.env"
+  grep -q '^\.agent-reports/$' .gitignore || fail ".gitignore must include .agent-reports/"
+
+  if grep -R -nE 'OPENCLAW_LLM_KEY=(sk-|vk1\.|REPLACE_WITH_REAL)|VK_COMMUNITY_TOKEN=vk1\.' \
+    .agent.env.example tools/configure-existing-openclaw-railway.sh AGENT_CONFIGURE_EXISTING_OPENCLAW.md installer.manifest.json 2>/dev/null | tee -a "$REPORT_FILE"; then
+    fail "possible real secret found in public agent files"
+  fi
+}
+
+check_required_files() {
+  log "check required runtime files"
+  require_file "$MANIFEST_FILE"
   local files
-  files="$(node -e "const m=require('./${MANIFEST_FILE}'); for (const f of m.requiredFiles) console.log(f)")"
+  files="$(manifest_list requiredFiles)"
   while IFS= read -r file; do
     [ -n "$file" ] || continue
     require_file "$file"
@@ -174,7 +206,7 @@ check_required_files() {
 }
 
 check_syntax() {
-  log "check syntax"
+  log "check runtime syntax"
   bash -n entrypoint.sh
   bash -n client-pack/sync-skills.sh
   bash -n client-pack/verify-runtime.sh
@@ -196,7 +228,7 @@ PY
 }
 
 check_forbidden_patterns() {
-  log "check forbidden patterns"
+  log "check forbidden runtime patterns"
   forbid_grep '<<<<<<<|=======|>>>>>>>' . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.agent-reports --exclude='.agent.env'
   forbid_grep 'VOLUME[[:space:]]*\["/data"\]' Dockerfile
   forbid_grep '/data/\.clawdbot' Dockerfile entrypoint.sh client-pack/*.sh client-pack/*.mjs
@@ -204,7 +236,7 @@ check_forbidden_patterns() {
 }
 
 check_invariants() {
-  log "check repo invariants"
+  log "check deploy-readiness invariants"
   require_grep '^ENV OPENCLAW_STATE_DIR=/data/\.openclaw$' Dockerfile
   require_grep '^ENV OPENCLAW_PACK_STATE_DIR=/data/\.openclaw/client-pack$' Dockerfile
   require_grep '^ENV OPENCLAW_CONFIG_PATH=/data/\.openclaw/openclaw\.json$' Dockerfile
@@ -219,6 +251,13 @@ check_invariants() {
   require_grep '^builder = "DOCKERFILE"$' railway.toml
   require_grep '^healthcheckPath = "/setup/healthz"$' railway.toml
   require_grep '^requiredMountPath = "/data"$' railway.toml
+}
+
+check_deploy_readiness() {
+  check_required_files
+  check_syntax
+  check_forbidden_patterns
+  check_invariants
 }
 
 check_env() {
@@ -251,6 +290,10 @@ set_railway_var() {
   local value="$2"
   [ "$NO_RAILWAY" = "true" ] && { log "skip variable set $key (--no-railway)"; return 0; }
   log "set Railway variable: $key"
+  if printf '%s' "$value" | railway variable set "$key" --stdin --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" 2>&1 | tee -a "$REPORT_FILE"; then
+    return 0
+  fi
+  warn "railway variable set --stdin failed for $key; falling back to KEY=value form"
   railway variable set "${key}=${value}" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" 2>&1 | tee -a "$REPORT_FILE"
 }
 
@@ -306,34 +349,47 @@ write_repo_report() {
 
 main() {
   append_report_header
-  load_env
+  load_env_if_needed
   write_repo_report
 
-  check_required_files
-  check_syntax
-  check_forbidden_patterns
-  check_invariants
-  check_env
-  check_railway
-
   case "$MODE" in
+    self-check)
+      check_agent_files
+      log "self-check ok"
+      ;;
     check)
+      check_agent_files
+      check_deploy_readiness
+      check_env
+      check_railway
       log "check ok"
       ;;
     vars)
+      check_agent_files
+      check_env
+      check_railway
       set_railway_variables
       ;;
     deploy)
+      check_agent_files
+      check_deploy_readiness
+      check_env
+      check_railway
       set_railway_variables
       deploy_local_repo
       collect_logs
       ;;
     redeploy)
+      check_agent_files
+      check_env
+      check_railway
       set_railway_variables
       redeploy_service
       collect_logs
       ;;
     logs)
+      check_agent_files
+      check_railway
       collect_logs
       ;;
     *)
